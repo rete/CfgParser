@@ -2,7 +2,7 @@
 # this file is parsed when FIND_PACKAGE is called with version argument
 #
 # @author Jan Engels, Desy IT
-# Modified for CfgParser use by : rete
+# Modified for CfgParser libraries by : Rémi Eté
 ##############################################################################
 
 

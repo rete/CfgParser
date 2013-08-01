@@ -23,7 +23,7 @@
 #   CfgParser_${COMPONENT}_LIB_DEPENDS : individual library dependencies
 #
 # @author Jan Engels, Desy
-# Modified for SDHCAL use by : rete
+# Modified for CfgParser libraries by : Rémi Eté
 ##############################################################################
 
 SET( CfgParser_ROOT "@CMAKE_INSTALL_PREFIX@" )
