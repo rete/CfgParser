@@ -1,0 +1,50 @@
+########################################
+# INSTALL file for CfgParser package
+# @author : Eté Rémi
+# @version 0.1.0 13/08/2013
+# @copyright 2013 Eté Rémi
+########################################
+
+
+//CfgParser package for configuration ini file format
+Copyright (c) 2013 Eté Rémi
+
+This file is part of CfgParser libraries.
+
+CfgParser is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+CfgParser is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with CfgParser.  If not, see <http://www.gnu.org/licenses/>.
+
+
+
+REQUIREMENTS:
+=============
+   Needs : 
+     - cmake minimum version 2.6
+     - make compatible with the cmake version above 
+   
+   Useful packages :
+     - Doxygen (for code documentation)
+
+
+INSTALL:
+=============
+
+  In the root directory :
+
+    mkdir build (if there's not)
+    cd build
+    cmake ..
+    make install
+     
+  Enjoy !  :)
+  

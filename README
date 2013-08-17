@@ -1,0 +1,71 @@
+########################################
+# README file for CfgParser package
+# @author : Eté Rémi
+# @version 0.1.0 13/08/2013
+# @copyright 2013 Eté Rémi
+########################################
+
+
+//CfgParser package for configuration ini file format
+Copyright (c) 2013 Eté Rémi
+
+This file is part of CfgParser libraries.
+
+CfgParser is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+CfgParser is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with CfgParser.  If not, see <http://www.gnu.org/licenses/>.
+
+
+
+PURPOSE :
+=========
+
+CfgParser package is a c++ library for configuration file parsing using ini format.
+This package aims to be compatible with the python ConfigParser set of classes. 
+It is possible to write a file from python and read it again with this library.
+
+For python equivalent code see the official web page of documentation:
+    http://docs.python.org/2/library/configparser.html
+ 
+A section is read with a set of option/value pairs like :
+
+[section]
+
+option : 42
+option1 = a long line that
+  finishes on an other line
+option2 = %(option)s is the answer of everything
+
+where option2 will resolve in "42 is the answer of everything" if the CfgParser class is used
+
+See doc/html/index.html after building the documentation with doxygen
+
+
+
+INSTALL:
+=========
+
+See INSTALL file in the main directory
+for more informations about installation.
+
+
+
+EXAMPLE:
+=========
+
+Some examples are provided in the source/example directory.
+
+
+
+
+Report bug to <remi.ete@gmail.com> 
+
