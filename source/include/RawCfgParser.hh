@@ -309,6 +309,13 @@ namespace cfgparser {
 			 */
 			const StringCollection GetValues( const std::string &secName ) const;
 
+			/*!
+			 *
+			 * @brief  Clear the parser content.
+			 *
+			 */
+			StatusCode Clear();
+
 
 		// inline member functions
 		public:

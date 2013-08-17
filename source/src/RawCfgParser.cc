@@ -477,6 +477,16 @@ namespace cfgparser {
 	}
 
 
+	StatusCode RawCfgParser::Clear() {
+
+		for( unsigned int i=0 ; i<sections->size() ; i++ ) {
+			CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , sections->at(i)->Clear() );
+		}
+		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , defaultSection->Clear() );
+		return CFGPARSER_SUCCESS();
+	}
+
+
 //---------------------------------------------------------------------------------------------------------------
 
 	/****************************
