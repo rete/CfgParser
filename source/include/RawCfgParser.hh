@@ -49,8 +49,7 @@ namespace cfgparser {
 
 	/*!
 	 *
-	 * brief Class RawCfgParser.
-	 *
+	 * @brief Class RawCfgParser
 	 * Parse and write configuration file in an ini format.
 	 *
 	 * Example:

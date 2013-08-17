@@ -105,8 +105,8 @@ namespace cfgparser {
 
 	/*!
 	 *
-	 * @brief  ParserStatus enum
-	 * List the different states that can be used
+	 * @brief  ParserStatus enum,
+	 * list the different states that can be used
 	 * in CfgParser libraries
 	 *
 	 */
@@ -131,8 +131,8 @@ namespace cfgparser {
 
 	/*!
 	 *
-	 * @brief  StatusCode class
-	 * Helper class that identify a state which is returned from a functions.
+	 * @brief  StatusCode class,
+	 * helper class that identify a state which is returned from a functions.
 	 * Allows to catch exception in an easier way
 	 * and is better for future code maintenance
 	 *
@@ -274,8 +274,8 @@ namespace cfgparser {
 
 	/*!
 	 *
-	 * @brief CfgParserExeption class.
-	 * Responsible to throw exception while using the CfgParser library classes
+	 * @brief CfgParserException class,
+	 * responsible to throw exception while using the CfgParser library classes
 	 *
 	 */
 	class CfgParserException : public std::exception {

@@ -50,11 +50,11 @@ namespace cfgparser {
 
 	/*!
 	 *
-	 * @brief  ChainSection class.
+	 * @brief  ChainSection class,
+	 * this class is a helper class for CfgParser
+	 * class while using interpolations.
 	 *
-	 * This class is a helper class for CfgParser
-	 * class while using interpolations. It aims
-	 * to find a value in a given set of sections
+	 * It aims to find a value in a given set of sections
 	 * by looking for in each section with a specific
 	 * order. First section appended, first section
 	 * checked. This class is not really useful if
@@ -125,12 +125,12 @@ namespace cfgparser {
 
 	/*!
 	 *
-	 * @brief  CfgParser class.
-	 *
-	 * Read in the same manner as the RawCfgParser class.
-	 * Implements a new GetValue() virtual methods for strings
+	 * @brief  CfgParser class,
+	 * implements a new GetValue() virtual method for strings
 	 * that interpolate a specific string portion like %()s
 	 * with a given set of options.
+	 *
+	 * Read in the same manner as the RawCfgParser class.
 	 *
 	 * Example:
 	 *

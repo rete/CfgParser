@@ -56,9 +56,9 @@ namespace cfgparser {
 
 	/*!
 	 *
-	 * Section class.
+	 * @brief  Section class,
+	 * represent a config section in cfg file.
 	 *
-	 * Represent a config section in cfg file.
 	 * A section has a name and a set of option/value
 	 * pairs of various types. These values can be
 	 * retrieved by using GetValue() methods.
