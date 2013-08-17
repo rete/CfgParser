@@ -1,0 +1,77 @@
+/** 
+\mainpage CfgParser
+
+<hr>
+ 
+<b>CfgParser</b>
+is a c++ library for ini file format parsing and writing. It aims to be compatible with python 
+ConfigParser module and follow the same parsing algorithm. For more information about 
+the python module, see the <a href="http://docs.python.org/2/library/configparser.html">ConfigParser</a> webpage.
+
+
+<h2>Overview</h2>
+
+The CfgParser library parses *.cfg file with a specific syntax. Those are organized 
+in sections that contains option/value pairs. The syntax is as follow:
+
+<pre>
+[sectionName]
+
+# this is a comment
+anOption : aValue
+anInteger : 42
+
+# note the space on the second value line
+aLongOption = this is a long 
+   line value
+aSpecialOption : %(anInteger)s is the answer of everything
+
+</pre>
+
+Note the special option at the end. By using cfgparser::CfgParser class, this kind of value can
+be interpolated with an other option in the same section or in the default one. Additional
+interpolation can be done on initialization in the code. This mean that the option 'aSpecialOption'
+will be resolved as "42 is the answer of everything". This is a very useful mechanism.
+
+Lines that begin with a # or a ; are comment lines, but the first encountered character must 
+be a # or a ;.
+
+A default section can be stored in a cfg file. It is created by passing an OptionValueMap object in 
+the constructor.
+
+<h2>Installation</h2>
+
+The installation of CfgParser is described in the <a href="../../INSTALL">INSTALL</a>.
+
+
+<h2>Using CfgParser</h2>
+After having installed CfgParser you have to write your own main file  
+that read a given file. Examples are provided in the source/example directory.
+
+
+<h2>CfgParser utilities</h2>
+
+This package also provide utilities to get directly a value from a file, using interpolation or not.
+The use is very simple. To get a raw value without any interpolation, just do:
+
+<pre>  rawcfgparser_getvalue cfgFile.cfg aSection anOption </pre>
+
+This will display directly the asked value. In the same manner, to get a value but with an interpolation,
+do:
+
+<pre>  cfgparser_getvalue cfgFile.cfg aSection anOption </pre>
+
+<hr>
+
+<h3>Release Notes</h3>
+CfgParser is under development and there are frequent releases. Please check the git
+<a href="https://github.com/rete/CfgParser">CfgParser web page</a> to upgrade your version
+
+<hr>
+
+If you have any questions or proposals for new features please contact the author:
+
+<a href="mailto:Eté Rémi &lt;remi.ete@gmail.com&gt;">remi.ete@gmail.com</a>
+
+*/
+
