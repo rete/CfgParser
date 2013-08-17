@@ -107,14 +107,6 @@ namespace cfgparser {
 		return statusCode;
 	}
 
-	StatusCode CFGPARSER_INTERPOLATION_ERROR( const std::string &message ) {
-
-		StatusCode statusCode;
-		statusCode.fParserStatus = fParserInterpolationError;
-		statusCode.message = message;
-		return statusCode;
-	}
-
 	StatusCode CFGPARSER_INTERPOLATION_DEPTH_ERROR( const std::string &message ) {
 
 		StatusCode statusCode;

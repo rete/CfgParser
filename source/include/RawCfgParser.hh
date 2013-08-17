@@ -49,7 +49,29 @@ namespace cfgparser {
 
 	/*!
 	 *
-	 * brief Class RawCfgParser
+	 * brief Class RawCfgParser.
+	 *
+	 * Parse and write configuration file in an ini format.
+	 *
+	 * Example:
+	 *
+	 *     [sectionName]
+	 *
+	 *     # this is a comment
+	 *     anOption : aValue
+	 *     aLongOption = this is a
+	 *        long value
+	 *     anInteger : 158
+	 *     aDoubleVector = 145.6:146985.2:.2:965.4:5.5
+	 *
+	 * Interpolation are not implemented in this class.
+	 * For this feature, use the CfgParser class.
+	 *
+	 * Vector values are separated with a ':' character.
+	 * Section can only be created, removed and filled
+	 * via this class. A section is got as a constant
+	 * object so that it can't be modified without the
+	 * parser instance.
 	 *
 	 */
 
@@ -60,6 +82,9 @@ namespace cfgparser {
 			/*!
 			 *
 			 * @brief  Default Constructor
+			 * Option/value pairs can be passed for the default section
+			 * The flag 'allowNoValue' allows to set and read an option
+			 * with no value (disabled by default).
 			 *
 			 */
 			RawCfgParser( const OptionValueMap *optionValueMap = 0 , bool allowNoValue = false );
@@ -366,12 +391,10 @@ namespace cfgparser {
 		// protected members
 		protected:
 
-			SectionCollection *sections;
-			Section *defaultSection;
-			static const std::string DEFAULT_SECTION;
-			bool allowNoValue;
-
-
+			SectionCollection *sections;                       ///< The sections in the parser instance.
+			Section *defaultSection;                           ///< The default section.
+			static const std::string DEFAULT_SECTION;        ///< The default section name.
+			bool allowNoValue;                                ///< True if allows no value for a given option
 
 
 	};  // class

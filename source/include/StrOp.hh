@@ -45,7 +45,7 @@ namespace cfgparser {
 
 	/*!
 	 *
-	 * @brief Normalize the name
+	 * @brief  Normalize the name
 	 *
 	 */
 	void NormalizeName( std::string *str );
@@ -53,49 +53,52 @@ namespace cfgparser {
 
 	/*!
 	 *
-	 * @brief Trim leading and trailing spaces from the string 'str'
+	 * @brief  Trim leading and trailing spaces from the string 'str'
 	 *
 	 */
 	void StrTrim( std::string *str );
 
 	/*!
 	 *
-	 * @brief Trim trailing spaces from the string 'str'
+	 * @brief  Trim trailing spaces from the string 'str'
 	 *
 	 */
 	void RStrTrim( std::string *str );
 
 	/*!
 	 *
-	 *
+	 * @brief  Split the string in many string portion
+	 * separated by a given delimiter
 	 *
 	 */
 	std::vector<std::string> Split( const std::string &str , const char delimiter = ' ' , int maxSplit = -1 );
 
 	/*!
 	 *
-	 *
+	 * @brief  Lower the string
 	 *
 	 */
 	std::string ToLower( const std::string &str );
 
 	/*!
 	 *
-	 *
+	 * @brief  Upper the string
 	 *
 	 */
 	std::string ToUpper( const std::string &str );
 
 	/*!
 	 *
-	 *
+	 * @brief  Find the section name in a complete
+	 * line of cfgparser file
 	 *
 	 */
 	StatusCode GroupSectionName( const std::string &completeSectionLine , std::string &sectionName );
 
 	/*!
 	 *
-	 *
+	 * @brief  Find an option, its separator and its
+	 * associated value from a complete line of cfgparser file
 	 *
 	 */
 	StatusCode GroupOptionSeparatorAndValue( const std::string &parserLine , std::string &option , std::string &separator , std::string &value );
@@ -107,6 +110,7 @@ namespace cfgparser {
 	 */
 	typedef std::vector<std::string> StringCollection;
 	typedef std::vector<const std::string> ConstStringCollection;
+
 
 }  //  end namespace cfgparser
 

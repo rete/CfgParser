@@ -48,7 +48,19 @@
 namespace cfgparser {
 
 
-
+	/*!
+	 *
+	 * @brief  ChainSection class.
+	 *
+	 * This class is a helper class for CfgParser
+	 * class while using interpolations. It aims
+	 * to find a value in a given set of sections
+	 * by looking for in each section with a specific
+	 * order. First section appended, first section
+	 * checked. This class is not really useful if
+	 * used in an other context of CfgParser library.
+	 *
+	 */
 
 	class ChainSection {
 
@@ -56,7 +68,7 @@ namespace cfgparser {
 
 			/*!
 			 *
-			 *
+			 * @brief  Constructor
 			 *
 			 */
 			ChainSection()
@@ -64,7 +76,7 @@ namespace cfgparser {
 
 			/*!
 			 *
-			 *
+			 * @brief  Destructor
 			 *
 			 */
 			~ChainSection() {
@@ -75,7 +87,7 @@ namespace cfgparser {
 
 			/*!
 			 *
-			 *
+			 * @brief Add a section to the section list
 			 *
 			 */
 			void AddSection( Section *sec )
@@ -83,21 +95,22 @@ namespace cfgparser {
 
 			/*!
 			 *
-			 *
+			 * @brief  Return a value by looking in the order where
+			 * the sections have been added.
 			 *
 			 */
 			StatusCode GetValue( const std::string &option , std::string *value ) const;
 
 			/*!
 			 *
-			 *
+			 * @brief  Return all the options of all sections
 			 *
 			 */
 			StringCollection GetOptions() const;
 
 			/*!
 			 *
-			 *
+			 * @brief  Return true if one of the sections has the given option
 			 *
 			 */
 			bool HasOption( const std::string &opt ) const;
@@ -105,14 +118,31 @@ namespace cfgparser {
 
 		// private members
 		private:
-			SectionCollection *sectionCollection;
+			SectionCollection *sectionCollection;    ///< The sections in a specific order
 
 
 	};
 
 	/*!
 	 *
-	 * @brief  CfgParser class
+	 * @brief  CfgParser class.
+	 *
+	 * Read in the same manner as the RawCfgParser class.
+	 * Implements a new GetValue() virtual methods for strings
+	 * that interpolate a specific string portion like %()s
+	 * with a given set of options.
+	 *
+	 * Example:
+	 *
+	 *    [section]
+	 *
+	 *    option1 : 42
+	 *    option2 : %(option1)s is the answer of everything
+	 *
+	 *
+	 * Here, option2 will resolve in "42 is the answer of everything"
+	 * To disable this feature and retrieve the raw value, use the
+	 * boolean value raw = true.
 	 *
 	 */
 
@@ -137,19 +167,13 @@ namespace cfgparser {
 			virtual StatusCode GetValue( const std::string& section , const std::string &key, std::string *value , bool raw = false , Section *vars = 0 ) const;
 
 
-
-		// protected members
-		protected:
-
-//			static const int MAX_INTERPOLATION_DEPTH;
-
-
 		// protected member functions
 		protected:
 
 			/*!
 			 *
-			 *
+			 * @brief  Interpolate a given string with a given set of sections (ChainSection).
+			 * The final value is retrieved in the 'value' argument
 			 *
 			 */
 			StatusCode Interpolate( const std::string &str , const ChainSection *chainSection , std::string *value ) const;

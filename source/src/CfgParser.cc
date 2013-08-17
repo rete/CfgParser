@@ -35,10 +35,12 @@ using namespace std;
 
 namespace cfgparser {
 
-//	const int CfgParser::MAX_INTERPOLATION_DEPTH = 10;
 
+//---------------------------------------------------------------------------------------------------------------
 
-
+	/****************************
+	 * Public member functions
+	 ****************************/
 
 	StatusCode ChainSection::GetValue( const std::string &option , string *value ) const {
 
@@ -76,6 +78,7 @@ namespace cfgparser {
 		return result;
 	}
 
+
 	bool ChainSection::HasOption( const std::string &opt ) const {
 
 		for( unsigned int i=0 ; i<sectionCollection->size() ; i++ ) {
@@ -88,6 +91,9 @@ namespace cfgparser {
 
 //-------------------------------------------------------------------------------------------------------------------------------
 
+	/****************************
+	 * Public member functions
+	 ****************************/
 
 	CfgParser::CfgParser() : RawCfgParser() {}
 
@@ -131,6 +137,13 @@ namespace cfgparser {
 		return CFGPARSER_SUCCESS();
 	}
 
+
+//---------------------------------------------------------------------------------------------------------------
+
+	/****************************
+	 * Private member functions
+	 ****************************/
+
 	StatusCode CfgParser::Interpolate( const std::string &str , const ChainSection *chainSection , std::string *value ) const {
 
 		string finalString = str;
@@ -139,7 +152,7 @@ namespace cfgparser {
 		size_t posOpen = 0;
 		size_t posClose = 0;
 
-		while(true) {
+		while( true ) {
 
 			posOpen = finalString.find( "%(" , posOpen );
 

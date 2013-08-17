@@ -55,6 +55,7 @@ namespace cfgparser {
 		if ( i < j ) str->erase( i, j );
 	}
 
+
 	void RStrTrim( std::string *str ) {
 
 		int i = str->length();
@@ -124,6 +125,7 @@ namespace cfgparser {
 		return vec;
 	}
 
+
 	string ToLower( const string &str ) {
 
 		string s;
@@ -132,6 +134,7 @@ namespace cfgparser {
 		return s;
 	}
 
+
 	string ToUpper( const string &str ) {
 
 		string s;
@@ -139,6 +142,7 @@ namespace cfgparser {
 			s.push_back( toupper( str.at(i) ) );
 		return s;
 	}
+
 
 	StatusCode GroupSectionName( const string &completeSectionLine , string &sectionName ) {
 
@@ -206,11 +210,6 @@ namespace cfgparser {
 			}
 			option += line.at(i);
 		}
-
-
-
-
-
 		return CFGPARSER_SUCCESS();
 	}
 

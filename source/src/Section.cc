@@ -32,14 +32,14 @@ using namespace std;
 
 namespace cfgparser {
 
+//---------------------------------------------------------------------------------------------------------------
 
-//	Section::Section() {
-//
-//		optionValueMap.clear();
-//		name = "";
-//	}
+	/****************************
+	 * Public member functions
+	 ****************************/
 
 	Section::Section( const string &n ) {
+
 		name = n;
 		optionValueMap.clear();
 	}
@@ -51,145 +51,10 @@ namespace cfgparser {
 		optionValueMap = section.optionValueMap;
 	}
 
+
 	Section::~Section() {
+
 		optionValueMap.clear();
-	}
-
-
-	StatusCode Section::SetValue( const string &option , const string &value ) {
-
-		if( option.empty() )
-			return CFGPARSER_INVALID_SECTION_KEY("Empty string for option in section '"+ this->name + "'");
-
-		optionValueMap[ option ] = value;
-
-		return CFGPARSER_SUCCESS();
-	}
-
-	StatusCode Section::SetValue( const std::string &option, const int &value ) {
-
-		if( option.empty() )
-			return CFGPARSER_INVALID_SECTION_KEY("Empty string for option in section '"+ this->name + "'");
-
-		ostringstream ss;
-		ss << value;
-		optionValueMap[ option ] = ss.str();
-
-		return CFGPARSER_SUCCESS();
-	}
-
-	StatusCode Section::SetValue( const std::string &option, const double &value ) {
-
-		if( option.empty() )
-			return CFGPARSER_INVALID_SECTION_KEY("Empty string for option in section '"+ this->name + "'");
-
-		ostringstream ss;
-		ss << value;
-		optionValueMap[ option ] = ss.str();
-
-		return CFGPARSER_SUCCESS();
-	}
-
-	StatusCode Section::SetValue( const std::string &option, const bool &value ) {
-
-		if( option.empty() )
-			return CFGPARSER_INVALID_SECTION_KEY("Empty string for option in section '"+ this->name + "'");
-
-		if( value )
-			optionValueMap[ option ] = "true";
-		else optionValueMap[ option ] = "false";
-
-		return CFGPARSER_SUCCESS();
-	}
-
-	StatusCode Section::SetValue( const std::string &option, const std::vector< std::string > &value ) {
-
-		if( option.empty() )
-			return CFGPARSER_INVALID_SECTION_KEY("Empty string for option in section '"+ this->name + "'");
-
-		if( value.empty() )
-			return CFGPARSER_SUCCESS();
-
-		ostringstream ss;
-
-		for( unsigned int i=0 ; i<value.size() ; i++ ) {
-
-			if( i != 0 )
-				ss << ":";
-			ss << value.at(i);
-		}
-
-		optionValueMap[ option ] = ss.str();
-
-		return CFGPARSER_SUCCESS();
-	}
-
-	StatusCode Section::SetValue( const std::string &option, const std::vector< int > &value ) {
-
-		if( option.empty() )
-			return CFGPARSER_INVALID_SECTION_KEY("Empty string for option in section '"+ this->name + "'");
-
-		if( value.empty() )
-			return CFGPARSER_SUCCESS();
-
-		ostringstream ss;
-
-		for( unsigned int i=0 ; i<value.size() ; i++ ) {
-
-			if( i != 0 )
-				ss << ":";
-			ss << value.at(i);
-		}
-
-		optionValueMap[ option ] = ss.str();
-
-		return CFGPARSER_SUCCESS();
-	}
-
-	StatusCode Section::SetValue( const std::string &option, const std::vector< double > &value ) {
-
-		if( option.empty() )
-			return CFGPARSER_INVALID_SECTION_KEY("Empty string for option in section '"+ this->name + "'");
-
-		if( value.empty() )
-			return CFGPARSER_SUCCESS();
-
-		ostringstream ss;
-
-		for( unsigned int i=0 ; i<value.size() ; i++ ) {
-
-			if( i != 0 )
-				ss << ":";
-			ss << value.at(i);
-		}
-
-		optionValueMap[ option ] = ss.str();
-
-		return CFGPARSER_SUCCESS();
-	}
-
-	StatusCode Section::SetValue( const std::string &option, const std::vector< bool > &value ) {
-
-		if( option.empty() )
-			return CFGPARSER_INVALID_SECTION_KEY("Empty string for option in section '"+ this->name + "'");
-
-		if( value.empty() )
-			return CFGPARSER_SUCCESS();
-
-		ostringstream ss;
-
-		for( unsigned int i=0 ; i<value.size() ; i++ ) {
-
-			if( i != 0 )
-				ss << ":";
-			if( value.at(i) )
-				ss << "true";
-			else ss << "false";
-		}
-
-		optionValueMap[ option ] = ss.str();
-
-		return CFGPARSER_SUCCESS();
 	}
 
 
@@ -219,6 +84,7 @@ namespace cfgparser {
 		return CFGPARSER_SUCCESS();
 	}
 
+
 	StatusCode Section::GetValue( const string &option , int *value ) const {
 
 		string val;
@@ -245,7 +111,8 @@ namespace cfgparser {
 			*value = true;
 		else if ( val == "false" || val == "0" || val == "off" || val == "no" )
 			*value = false;
-		else return CFGPARSER_VALUE_ERROR("No known conversion from "+ val +" to boolean type.");
+		else
+			return CFGPARSER_VALUE_ERROR("No known conversion from "+ val +" to boolean type.");
 		return CFGPARSER_SUCCESS();
 	}
 
@@ -294,9 +161,6 @@ namespace cfgparser {
 	}
 
 
-
-
-
 	StatusCode Section::GetValue( const std::string &option , std::vector<int> *value ) const {
 
 		string val;
@@ -335,7 +199,8 @@ namespace cfgparser {
 					value->push_back( true );
 				else if ( s == "false" || s == "0" || s == "off" || s == "no" )
 					value->push_back( false );
-//				else return CFGPARSER_INVALID_VALUE();
+				else
+					return CFGPARSER_VALUE_ERROR("No known conversion from "+ val +" to boolean type.");
 				s = "";
 			}
 			if( i == val.size() - 1 )
@@ -365,11 +230,18 @@ namespace cfgparser {
 	}
 
 
+//---------------------------------------------------------------------------------------------------------------
+
+	/****************************
+	 * Protected member functions
+	 ****************************/
+
 	StatusCode Section::Clear() {
 
 		optionValueMap.clear();
 		return CFGPARSER_SUCCESS();
 	}
+
 
 	Section& Section::operator +=( const Section& section ) {
 
@@ -388,6 +260,7 @@ namespace cfgparser {
 		return section;
 	}
 
+
 	StatusCode Section::RemoveOption( const std::string &option ) {
 
 		if( option.empty() )
@@ -400,6 +273,149 @@ namespace cfgparser {
 		return CFGPARSER_SUCCESS();
 	}
 
+
+	StatusCode Section::SetValue( const string &option , const string &value ) {
+
+		if( option.empty() )
+			return CFGPARSER_INVALID_SECTION_KEY("Empty string for option in section '"+ this->name + "'");
+
+		optionValueMap[ option ] = value;
+
+		return CFGPARSER_SUCCESS();
+	}
+
+
+	StatusCode Section::SetValue( const std::string &option, const int &value ) {
+
+		if( option.empty() )
+			return CFGPARSER_INVALID_SECTION_KEY("Empty string for option in section '"+ this->name + "'");
+
+		ostringstream ss;
+		ss << value;
+		optionValueMap[ option ] = ss.str();
+
+		return CFGPARSER_SUCCESS();
+	}
+
+
+	StatusCode Section::SetValue( const std::string &option, const double &value ) {
+
+		if( option.empty() )
+			return CFGPARSER_INVALID_SECTION_KEY("Empty string for option in section '"+ this->name + "'");
+
+		ostringstream ss;
+		ss << value;
+		optionValueMap[ option ] = ss.str();
+
+		return CFGPARSER_SUCCESS();
+	}
+
+
+	StatusCode Section::SetValue( const std::string &option, const bool &value ) {
+
+		if( option.empty() )
+			return CFGPARSER_INVALID_SECTION_KEY("Empty string for option in section '"+ this->name + "'");
+
+		if( value )
+			optionValueMap[ option ] = "true";
+		else optionValueMap[ option ] = "false";
+
+		return CFGPARSER_SUCCESS();
+	}
+
+
+	StatusCode Section::SetValue( const std::string &option, const std::vector< std::string > &value ) {
+
+		if( option.empty() )
+			return CFGPARSER_INVALID_SECTION_KEY("Empty string for option in section '"+ this->name + "'");
+
+		if( value.empty() )
+			return CFGPARSER_SUCCESS();
+
+		ostringstream ss;
+
+		for( unsigned int i=0 ; i<value.size() ; i++ ) {
+
+			if( i != 0 )
+				ss << ":";
+			ss << value.at(i);
+		}
+
+		optionValueMap[ option ] = ss.str();
+
+		return CFGPARSER_SUCCESS();
+	}
+
+
+	StatusCode Section::SetValue( const std::string &option, const std::vector< int > &value ) {
+
+		if( option.empty() )
+			return CFGPARSER_INVALID_SECTION_KEY("Empty string for option in section '"+ this->name + "'");
+
+		if( value.empty() )
+			return CFGPARSER_SUCCESS();
+
+		ostringstream ss;
+
+		for( unsigned int i=0 ; i<value.size() ; i++ ) {
+
+			if( i != 0 )
+				ss << ":";
+			ss << value.at(i);
+		}
+
+		optionValueMap[ option ] = ss.str();
+
+		return CFGPARSER_SUCCESS();
+	}
+
+
+	StatusCode Section::SetValue( const std::string &option, const std::vector< double > &value ) {
+
+		if( option.empty() )
+			return CFGPARSER_INVALID_SECTION_KEY("Empty string for option in section '"+ this->name + "'");
+
+		if( value.empty() )
+			return CFGPARSER_SUCCESS();
+
+		ostringstream ss;
+
+		for( unsigned int i=0 ; i<value.size() ; i++ ) {
+
+			if( i != 0 )
+				ss << ":";
+			ss << value.at(i);
+		}
+
+		optionValueMap[ option ] = ss.str();
+
+		return CFGPARSER_SUCCESS();
+	}
+
+
+	StatusCode Section::SetValue( const std::string &option, const std::vector< bool > &value ) {
+
+		if( option.empty() )
+			return CFGPARSER_INVALID_SECTION_KEY("Empty string for option in section '"+ this->name + "'");
+
+		if( value.empty() )
+			return CFGPARSER_SUCCESS();
+
+		ostringstream ss;
+
+		for( unsigned int i=0 ; i<value.size() ; i++ ) {
+
+			if( i != 0 )
+				ss << ":";
+			if( value.at(i) )
+				ss << "true";
+			else ss << "false";
+		}
+
+		optionValueMap[ option ] = ss.str();
+
+		return CFGPARSER_SUCCESS();
+	}
 
 
 }  // namespace 
