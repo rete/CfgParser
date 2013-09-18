@@ -1,0 +1,67 @@
+#############################################################
+# cmake module for finding CfgParser
+#
+# returns:
+#   CfgParser_FOUND        : set to TRUE or FALSE
+#   CfgParser_INCLUDE_DIRS : paths to CfgParser includes
+#   CfgParser_LIBRARY_DIRS : paths to CfgParser libraries
+#   CfgParser_LIBRARIES    : list of CfgParser libraries
+#
+# @author Rémi Eté
+#############################################################
+
+
+
+# ---------- includes ---------------------------------------------------------
+SET( CfgParser_INCLUDE_DIRS CfgParser_INCLUDE_DIRS-NOTFOUND )
+MARK_AS_ADVANCED( CfgParser_INCLUDE_DIRS )
+
+# Include dir
+FIND_PATH( CfgParser_INCLUDE_DIR
+  NAMES source/include/CfgParser.hh
+  HINTS "@PROJECT_SOURCE_DIR@"
+  NO_DEFAULT_PATH
+)
+
+IF( NOT CfgParser_INCLUDE_DIR AND NOT CfgParser_FIND_QUIETLY )
+    MESSAGE( STATUS "Check for CfgParser: @PROJECT_SOURCE_DIR@"
+            " -- failed to find CfgParser include directory!!" )
+ENDIF()
+
+SET( CfgParser_LIBRARY CfgParser_LIBRARY-NOTFOUND )
+MARK_AS_ADVANCED( CfgParser_LIBRARY )
+
+
+FIND_LIBRARY( CfgParser_LIBRARY
+    NAMES CfgParser
+    PATHS "@PROJECT_SOURCE_DIR@"
+    PATH_SUFFIXES lib
+    NO_DEFAULT_PATH )
+
+IF( NOT CfgParser_LIBRARY AND NOT CfgParser_FIND_QUIETLY )
+    MESSAGE( STATUS "Check for CfgParser: @PROJECT_SOURCE_DIR@ "
+            " -- failed to find CfgParser library!!" )
+ENDIF()
+
+
+# set variables and display results
+IF( CfgParser_INCLUDE_DIR AND CfgParser_LIBRARY )
+    SET( CfgParser_FOUND TRUE )
+    SET( CfgParser_LIBRARIES ${CfgParser_LIBRARY} )
+    MARK_AS_ADVANCED( CfgParser_LIBRARIES )
+    
+    # add definitions only for debug modus
+    IF( CMAKE_BUILD_TYPE STREQUAL "Debug" OR
+            CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo" )
+        SET( CfgParser_DEFINITIONS "-DMARLINDEBUG" )
+        MARK_AS_ADVANCED( CfgParser_DEFINITIONS )
+    ENDIF()
+
+    MESSAGE( STATUS "Check for CfgParser: @PROJECT_SOURCE_DIR@ -- works" )
+ELSE()
+    IF( Marlin_FIND_REQUIRED )
+        MESSAGE( FATAL_ERROR "Check for CfgParser: @PROJECT_SOURCE_DIR@ -- failed!!" )
+    ENDIF()
+    MESSAGE( STATUS "Check for CfgParser: @PROJECT_SOURCE_DIR@"
+            " -- failed!! will skip this package..." )
+ENDIF()
