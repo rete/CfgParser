@@ -38,12 +38,15 @@ ENDIF()
 
 # -------- generate CfgParserConfig.h --------------------------------------------
 CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.h.cmake.in"
-    "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.h" @ONLY )
+    "${PROJECT_NAME}Config.h" @ONLY )
 
 CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/cmake/Find${PROJECT_NAME}.cmake.in"
     "${PROJECT_SOURCE_DIR}/Find${PROJECT_NAME}.cmake" @ONLY )
 
-INSTALL( FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.h" DESTINATION "source/include" )
+INSTALL( 
+	FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.h" 
+	DESTINATION "${CMAKE_INSTALL_PREFIX}/include/CfgParser/include" 
+)
 
 ADD_SUBDIRECTORY( ./source )
 
