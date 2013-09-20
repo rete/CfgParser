@@ -25,7 +25,18 @@ ADD_SHARED_LIBRARY( CfgParser ${CFGPARSER_LIBRARY_FILES} )
 
 INSTALL(
 	TARGETS CfgParser
-	LIBRARY DESTINATION lib 
+	LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib 
+)
+
+FILE (
+	GLOB_RECURSE
+	CFGPARSER_INCLUDE_FILES
+	include/*
+)
+
+INSTALL( 
+	DIRECTORY include
+	DESTINATION ${CMAKE_INSTALL_PREFIX}/include/CfgParser
 )
 
 
@@ -41,17 +52,7 @@ MAKE_EXECUTABLE( cfgparser_getvalue )
 IF( BUILD_EXAMPLE )
 
 	MAKE_EXAMPLE( example1 )
+	MAKE_EXAMPLE( example2 )
 
 ENDIF()
-
-
-
-
-#-------------------- install ----------------------- 
-#INSTALL( 
-#	TARGETS 
-#	cfgparser
-#	DESTINATION 
-#	bin
-#)
 
