@@ -3,3 +3,4 @@
 /CfgParserConfig.cmake
 /CfgParserConfigVersion.cmake
 /bin
+/FindCfgParser.cmake
