@@ -8,7 +8,6 @@ INCLUDE( MacroGeneratePackageConfigFiles )
 
 
 # include default settings
-INCLUDE( default_install_prefix )
 INCLUDE( default_build_type )
 INCLUDE( default_enable_ctest )
 INCLUDE( default_library_versioning )
