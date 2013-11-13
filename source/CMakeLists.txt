@@ -11,6 +11,8 @@ INCLUDE_DIRECTORIES( include )
 # require proper c++
 ADD_DEFINITIONS( "-pedantic -Wunused-value -O2" )
 ADD_DEFINITIONS("-Wno-long-long")
+# C++ 11 definition
+ADD_DEFINITIONS("-std=c++11")
 
 
 # create library
