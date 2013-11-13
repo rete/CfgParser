@@ -66,11 +66,10 @@ int main( int argc , char *argv[] ) {
 
 	CfgParser *parser = new CfgParser();
 
-	CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , parser->Read( fileName ) );
-	CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , parser->GetValue( sectionName , optionName , &value , false ) );
+	parser->read( fileName );
 
 	// print the value
-	cout << value << endl;
+	cout << parser->getValue<string>( sectionName , optionName , false ) << endl;
 
 	delete parser;
 

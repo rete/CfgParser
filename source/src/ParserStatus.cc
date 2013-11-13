@@ -33,20 +33,20 @@ using namespace std;
 namespace cfgparser {
 
 
-	string StatusCode::ToString() const {
+	string StatusCode::toString() const {
 
-		if( fParserStatus == fParserSuccess )    return "fParserSuccess";
-		else if( fParserStatus == fParserNoSectionError ) return "fParserNoSectionError";
-		else if( fParserStatus == fParserError ) return "fParserError";
-		else if( fParserStatus == fParserDuplicateSectionError ) return "fParserDuplicateSectionError";
-		else if( fParserStatus == fParserNoOptionError ) return "fParserNoOptionError";
-		else if( fParserStatus == fParserInterpolationError ) return "fParserInterpolationError";
-		else if( fParserStatus == fParserInterpolationDepthError ) return "fParserInterpolationDepthError";
-		else if( fParserStatus == fParserInterpolationMissingOptionError ) return "fParserInterpolationMissingOptionError";
-		else if( fParserStatus == fParserInterpolationSyntaxError ) return "fParserInterpolationSyntaxError";
-		else if( fParserStatus == fParserMissingSectionNameError ) return "fParserMissingSectionNameError";
-		else if( fParserStatus == fParserInvalidSectionKey ) return "fParserInvalidSectionKey";
-		else if( fParserStatus == fParserValueError ) return "fParserValueError";
+		if( _parserStatus == fParserSuccess )    return "fParserSuccess";
+		else if( _parserStatus == fParserNoSectionError ) return "fParserNoSectionError";
+		else if( _parserStatus == fParserError ) return "fParserError";
+		else if( _parserStatus == fParserDuplicateSectionError ) return "fParserDuplicateSectionError";
+		else if( _parserStatus == fParserNoOptionError ) return "fParserNoOptionError";
+		else if( _parserStatus == fParserInterpolationError ) return "fParserInterpolationError";
+		else if( _parserStatus == fParserInterpolationDepthError ) return "fParserInterpolationDepthError";
+		else if( _parserStatus == fParserInterpolationMissingOptionError ) return "fParserInterpolationMissingOptionError";
+		else if( _parserStatus == fParserInterpolationSyntaxError ) return "fParserInterpolationSyntaxError";
+		else if( _parserStatus == fParserMissingSectionNameError ) return "fParserMissingSectionNameError";
+		else if( _parserStatus == fParserInvalidSectionKey ) return "fParserInvalidSectionKey";
+		else if( _parserStatus == fParserValueError ) return "fParserValueError";
 		else return "fParserParsingError";
 	}
 
@@ -54,115 +54,115 @@ namespace cfgparser {
 	StatusCode CFGPARSER_SUCCESS( const std::string &message ) {
 
 		StatusCode statusCode;
-		statusCode.fParserStatus = fParserSuccess;
-		statusCode.message = message;
+		statusCode._parserStatus = fParserSuccess;
+		statusCode._message = message;
 		return statusCode;
 	}
 
 	StatusCode CFGPARSER_ERROR( const std::string &message ) {
 
 		StatusCode statusCode;
-		statusCode.fParserStatus = fParserError;
-		statusCode.message = message;
+		statusCode._parserStatus = fParserError;
+		statusCode._message = message;
 		return statusCode;
 	}
 
 	StatusCode CFGPARSER_INVALID_SECTION_KEY( const std::string &message ) {
 
 		StatusCode statusCode;
-		statusCode.fParserStatus = fParserInvalidSectionKey;
-		statusCode.message = message;
+		statusCode._parserStatus = fParserInvalidSectionKey;
+		statusCode._message = message;
 		return statusCode;
 	}
 
 	StatusCode CFGPARSER_NO_SECTION_ERROR( const std::string &message ) {
 
 		StatusCode statusCode;
-		statusCode.fParserStatus = fParserNoSectionError;
-		statusCode.message = message;
+		statusCode._parserStatus = fParserNoSectionError;
+		statusCode._message = message;
 		return statusCode;
 	}
 
 	StatusCode CFGPARSER_VALUE_ERROR( const std::string &message ) {
 
 		StatusCode statusCode;
-		statusCode.fParserStatus = fParserValueError;
-		statusCode.message = message;
+		statusCode._parserStatus = fParserValueError;
+		statusCode._message = message;
 		return statusCode;
 	}
 
 	StatusCode CFGPARSER_DUPLICATE_SECTION_ERROR( const std::string &message ) {
 
 		StatusCode statusCode;
-		statusCode.fParserStatus = fParserDuplicateSectionError;
-		statusCode.message = message;
+		statusCode._parserStatus = fParserDuplicateSectionError;
+		statusCode._message = message;
 		return statusCode;
 	}
 
 	StatusCode CFGPARSER_NO_OPTION_ERROR( const std::string &message ) {
 
 		StatusCode statusCode;
-		statusCode.fParserStatus = fParserNoSectionError;
-		statusCode.message = message;
+		statusCode._parserStatus = fParserNoSectionError;
+		statusCode._message = message;
 		return statusCode;
 	}
 
 	StatusCode CFGPARSER_INTERPOLATION_DEPTH_ERROR( const std::string &message ) {
 
 		StatusCode statusCode;
-		statusCode.fParserStatus = fParserInterpolationDepthError;
-		statusCode.message = message;
+		statusCode._parserStatus = fParserInterpolationDepthError;
+		statusCode._message = message;
 		return statusCode;
 	}
 
 	StatusCode CFGPARSER_INTERPOLATION_MISSING_OPTION_ERROR( const std::string &message ) {
 
 		StatusCode statusCode;
-		statusCode.fParserStatus = fParserInterpolationMissingOptionError;
-		statusCode.message = message;
+		statusCode._parserStatus = fParserInterpolationMissingOptionError;
+		statusCode._message = message;
 		return statusCode;
 	}
 
 	StatusCode CFGPARSER_INTERPOLATION_SYNTAX_ERROR( const std::string &message ) {
 
 		StatusCode statusCode;
-		statusCode.fParserStatus = fParserInterpolationSyntaxError;
-		statusCode.message = message;
+		statusCode._parserStatus = fParserInterpolationSyntaxError;
+		statusCode._message = message;
 		return statusCode;
 	}
 
 	StatusCode CFGPARSER_MISSING_SECTION_NAME_ERROR( const std::string &message ) {
 
 		StatusCode statusCode;
-		statusCode.fParserStatus = fParserMissingSectionNameError;
-		statusCode.message = message;
+		statusCode._parserStatus = fParserMissingSectionNameError;
+		statusCode._message = message;
 		return statusCode;
 	}
 
 	StatusCode CFGPARSER_PARSING_ERROR( const std::string &message ) {
 
 		StatusCode statusCode;
-		statusCode.fParserStatus = fParserParsingError;
-		statusCode.message = message;
+		statusCode._parserStatus = fParserParsingError;
+		statusCode._message = message;
 		return statusCode;
 	}
 
 	StatusCode& StatusCode::operator = ( StatusCode const &statusCode ) {
 
-		this->message = statusCode.message;
-		this->fParserStatus = statusCode.fParserStatus;
+		this->_message = statusCode._message;
+		this->_parserStatus = statusCode._parserStatus;
 		return *this;
 	}
 
 
 	bool operator != ( const StatusCode &sc1 , const StatusCode &sc2 ) {
 
-		return ( sc1.fParserStatus != sc2.fParserStatus );
+		return ( sc1._parserStatus != sc2._parserStatus );
 	}
 
 	bool operator == ( const StatusCode &sc1 , const StatusCode &sc2 ) {
 
-		return ( sc1.fParserStatus == sc2.fParserStatus );
+		return ( sc1._parserStatus == sc2._parserStatus );
 	}
 
 

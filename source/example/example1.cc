@@ -50,6 +50,8 @@
 using namespace std;
 using namespace cfgparser;
 
+//#include <valgrind/memcheck.h>
+
 
 
 int main( int argc , char *argv[] ) {
@@ -79,45 +81,48 @@ int main( int argc , char *argv[] ) {
 	 * the order you pass the cfg file string. The last file will
 	 * keep the right values in case of overloaded options !!
 	 *
-	 * To check if there no error while reading, use status code.
-	 * You can use macros or a simple check
+	 * To check if there no error while reading, use exception handling.
 	 *
 	 */
 
 	// Using a string and without any check
-	rawParser->Read( fileName );
+	rawParser->read( fileName );
 
-	rawParser->Clear();
+	rawParser->clear();
 
 
 
-	// Using a ifstream ( pointer or reference ) and using a simple check.
+	// Using a ifstream ( pointer or reference ) and using a simple check with exception handling.
 	ifstream *fileStream = new ifstream( fileName.c_str() );
-	StatusCode st = rawParser->Read( fileStream );
 
-	if( st != CFGPARSER_SUCCESS() ) {
+	try {
+		rawParser->read( fileStream );
+	}
+	catch ( CfgParserException &e ) {
 
 		cout << "   File '" << fileName << "' got an error while reading.\n"
 				"   The program has to terminate!" << endl;
+
+		rawParser->clear();
+		delete fileStream;
+		delete rawParser;
 		exit( 1 );
 	}
 
-	rawParser->Clear();
+	rawParser->clear();
 
 
 
-	// Using a string vector ( here only one file ) and CfgParser library macros.
+	// Using a string vector ( here only one file ).
 	// Throw a CfgParserException if an error is found while parsing.
 	StringCollection fileNames;
 	fileNames.push_back( fileName );
 
-	CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , rawParser->Read( fileNames ) );
+	rawParser->read( fileNames );
 
-	rawParser->Clear();
+	rawParser->clear();
 
-
-
-
+	delete fileStream;
 	delete rawParser;
 
 	return 0;

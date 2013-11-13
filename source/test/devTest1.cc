@@ -58,12 +58,12 @@ int main( int argc , char *argv[] ) {
 	string keyName = "anInteger";
 
 	ifstream *file = new ifstream( fileName.c_str() );
-	CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , parser->Read( file ) );
+	parser->read( file );
 
 
 	// Split test
 	string str("dflg ieh edcl kefbn ");
-	vector<string> splitStr = Split( str , 'e'  );
+	vector<string> splitStr = cfgparser::split( str , 'e'  );
 
 	cout << "'";
 	for( unsigned int i=0 ; i<splitStr.size() ; i++ )
@@ -74,44 +74,44 @@ int main( int argc , char *argv[] ) {
 	// other Split test
 	splitStr.clear();
 	str = "14:85:4521:856";
-	splitStr = Split( str , ':' );
+	splitStr = cfgparser::split( str , ':' );
 
 	cout << "'";
 	for( unsigned int i=0 ; i<splitStr.size() ; i++ )
 		cout << splitStr.at(i) << endl;
 	cout << "'" << endl;
 
-	cout << "I'm a " << Split( "bibou,babouba,endl", ',' ).at(0) << endl;
+	cout << "I'm a " << cfgparser::split( "bibou,babouba,endl", ',' ).at(0) << endl;
 
 
 	// ToLower test
 	str = "I'M A BABOON!";
 	cout << "normal : " << str << endl;
-	cout << "to lower : " << ToLower( str ) << endl;
+	cout << "to lower : " << cfgparser::toLower( str ) << endl;
 
 	// RStrTrim test
 	string trimTest = "   bibou   ";
 	cout << "before trim : '" << trimTest << "'" << endl;
-	RStrTrim( &trimTest );
+	cfgparser::rStrTrim( &trimTest );
 	cout << "after trim : '" << trimTest << "'" << endl;
 
 	cout << "---------------------------------" << endl;
 
-	const Section *sec = parser->GetSection( sectionName );
-	const Section *defaultSec = parser->GetDefaultSection();
+	const Section *sec = parser->getSection( sectionName );
+	const Section *defaultSec = parser->getDefaultSection();
 
-	if( sec == 0 )
+	if( sec == nullptr )
 		cout << "no section named "+sectionName << endl;
 	else {
 
-		cout << "section : " << sec->GetName() << endl;
+		cout << "section : " << sec->getName() << endl;
 		int vInt = 0;
 		string vString;
 		string aMultiLineKey = "aMultiLineValue";
 		string aMultiLineValue = "";
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , sec->GetValue( keyName , &vInt ) );
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , sec->GetValue( keyName , &vString ) );
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , sec->GetValue( aMultiLineKey , &aMultiLineValue ) );
+		vInt = sec->getValue<int>( keyName );
+		vString = sec->getValue<string>( keyName );
+		aMultiLineValue = sec->getValue<string>( aMultiLineKey );
 
 
 		cout << "my int val : " << vInt << endl;
@@ -126,23 +126,23 @@ int main( int argc , char *argv[] ) {
 	}
 	else {
 		int anImportantInt = 0;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , defaultSec->GetValue( "anImportantInt" , &anImportantInt ) );
+		anImportantInt = defaultSec->getValue<int>( "anImportantInt" );
 	}
 
 
 	// CfgParser test
 	CfgParser *cfgParser = new CfgParser();
 
-	CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , cfgParser->Read( fileName ) );
+	cfgParser->read( fileName );
 
 	string myOptionName = "myOption";
 	string myOptionValue;
 
-	CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , cfgParser->GetValue( sectionName , myOptionName , &myOptionValue , true ) );
+	myOptionValue = cfgParser->getValue<string>( sectionName , myOptionName , true );
 	cout << "myOptionValue : " << myOptionValue << endl;
 
 
-	CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , cfgParser->GetValue( sectionName , myOptionName , &myOptionValue , false ) );
+	myOptionValue = cfgParser->getValue<string>( sectionName , myOptionName , false );
 	cout << "myOptionValue : " << myOptionValue << endl;
 
 	delete cfgParser;

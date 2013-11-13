@@ -36,48 +36,42 @@
 #include <vector> 
 
 
-/*!
- *
+/**
  * @brief  Helper macro
  * Check a status code and throw a result
  * in case the status code returned from Command
  * is different from Status
- *
  */
 #define CFGPARSER_THROW_RESULT_IF( Status , Operator , Command )                                    \
 	{ 																								 \
 		StatusCode stat = Command;																	 \
-		if( Status.fParserStatus Operator stat.fParserStatus ) { 								 \
+		if( Status._parserStatus Operator stat._parserStatus ) { 								 \
 																									 \
-	        std::cerr << #Command << " throw " << stat.ToString() << std::endl;                   \
+	        std::cerr << #Command << " throw " << stat.toString() << std::endl;                   \
 	        std::cerr << "    in function : " << __FUNCTION__ << std::endl;							 \
 	        std::cerr << "    in file :     " << __FILE__ << " line#: " << __LINE__ << std::endl;    \
-	        std::cerr << "    message :     " << stat.message << std::endl;                       \
-	        throw CfgParserException( stat.message );											 \
+	        std::cerr << "    message :     " << stat._message << std::endl;                       \
+	        throw CfgParserException( stat._message );											 \
 		}																							 \
 	}
 
-/*!
- *
+/**
  * @brief  Helper macro
  * Print some info and throw the given Status
- *
  */
 #define CFGPARSER_THROW_RESULT( Status )                                    \
 	{ 																								 \
-	        std::cerr << "Status thrown : " << Status.ToString() << std::endl;                   \
+	        std::cerr << "Status thrown : " << Status.toString() << std::endl;                   \
 	        std::cerr << "    in function : " << __FUNCTION__ << std::endl;							 \
 	        std::cerr << "    in file :     " << __FILE__ << " line#: " << __LINE__ << std::endl;    \
-	        std::cerr << "    message :     " << Status.message << std::endl;                       \
-	        throw CfgParserException( Status.message );											 \
+	        std::cerr << "    message :     " << Status._message << std::endl;                       \
+	        throw CfgParserException( Status._message );											 \
 	}
 
-/*!
- *
+/**
  * @brief  Helper macro
  * Check if the specific pointer is null
  * and return an status code error
- *
  */
 #define CFGPARSER_CHECK_POINTER_AND_RETURN( Pointer )                       \
 		{                                                                    \
@@ -85,8 +79,7 @@
 				return CFGPARSER_ERROR("Assertion pointer != 0 failed!");   \
 		}
 
-/*!
- *
+/**
  * @brief  Helper macro
  * Check if the specific pointer is null
  * and throw a CfgParserException
@@ -103,12 +96,10 @@
 namespace cfgparser {
 
 
-	/*!
-	 *
+	/**
 	 * @brief  ParserStatus enum,
 	 * list the different states that can be used
 	 * in CfgParser libraries
-	 *
 	 */
 	enum ParserStatus {
 
@@ -129,183 +120,144 @@ namespace cfgparser {
 
 
 
-	/*!
-	 *
+	/**
 	 * @brief  StatusCode class,
 	 * helper class that identify a state which is returned from a functions.
 	 * Allows to catch exception in an easier way
 	 * and is better for future code maintenance
-	 *
 	 */
 	class StatusCode {
 
-		public:
-			/*!
-			 *
-			 * @brief  Constructor
-			 *
-			 */
-			StatusCode() : fParserStatus(fParserSuccess) , message("") {}
+	public:
 
-			/*!
-			 *
-			 * @brief
-			 *
-			 */
-			std::string ToString() const;
+		/**
+		 * @brief  Constructor
+		 */
+		StatusCode() : _parserStatus(fParserSuccess) , _message("") {}
 
-		// public members
-		public:
+		/**
+		 * @brief Returns the status code into string
+		 */
+		std::string toString() const;
 
-			ParserStatus fParserStatus;     ///< The parser status
-			std::string message;            ///< The returned message
+		/**
+		 * @brief  Assignment operator
+		 */
+		StatusCode& operator =(const StatusCode& statusCode);
 
-			/*!
-			 *
-			 * @brief  Assignment operator
-			 *
-			 */
-			StatusCode& operator =(const StatusCode& statusCode);
+	// public members
+	public:
+
+		ParserStatus _parserStatus;     ///< The parser status
+		std::string _message;            ///< The returned message
 
 	};
 
-	/*!
-	 *
+	/**
 	 * @brief  "Not equal to" operator to compare two StatusCode object
-	 *
 	 */
 	bool operator != ( const StatusCode &sc1 , const StatusCode &sc2 );
 
-	/*!
-	 *
+	/**
 	 * @brief  "Equal to" operator to compare two StatusCode object
-	 *
 	 */
 	bool operator == ( const StatusCode &sc1 , const StatusCode &sc2 );
 
 
-	/*!
-	 *
+	/**
 	 * @brief  Status code which is returned for successful operation
-	 *
 	 */
 	StatusCode CFGPARSER_SUCCESS( const std::string &message = "" );
 
-	/*!
-	 *
+	/**
 	 * @brief  Status code which is returned for generic errors
-	 *
 	 */
 	StatusCode CFGPARSER_ERROR( const std::string &message = "" );
 
-	/*!
-	 *
+	/**
 	 * @brief  Status code which is returned while looking for
 	 * a missing section in a parser instance.
-	 *
 	 */
 	StatusCode CFGPARSER_NO_SECTION_ERROR( const std::string &message = "" );
 
-	/*!
-	 *
+	/**
 	 * @brief  Status code which is returned when creating a
 	 * section that already exists in the parser
-	 *
 	 */
 	StatusCode CFGPARSER_DUPLICATE_SECTION_ERROR( const std::string &message = "" );
 
-	/*!
-	 *
+	/**
 	 * @brief  Status code which is returned while looking for
 	 * a missing option in a parser instance or a given section
-	 *
 	 */
 	StatusCode CFGPARSER_NO_OPTION_ERROR( const std::string &message = "" );
 
-	/*!
-	 *
+	/**
 	 * @brief  Status code which is returned while parsing
 	 * and building a bad value.
-	 *
 	 */
 	StatusCode CFGPARSER_VALUE_ERROR( const std::string &message = "" );
 
-	/*!
-	 *
+	/**
 	 * @brief  Status code which is returned while interpolating
 	 * a value with an other option that doesn't exists.
-	 *
 	 */
 	StatusCode CFGPARSER_INTERPOLATION_MISSING_OPTION_ERROR( const std::string &message = "" );
 
-	/*!
-	 *
+	/**
 	 * @brief  Status code which is returned while interpolating
-	 * and a syntax error is found.
-	 *
+	 * and a syntax error is found
 	 */
 	StatusCode CFGPARSER_INTERPOLATION_SYNTAX_ERROR( const std::string &message = "" );
 
-	/*!
-	 *
+	/**
 	 * @brief  Status code which is returned if a non
 	 * existing option is used
-	 *
 	 */
 	StatusCode CFGPARSER_INVALID_SECTION_KEY( const std::string &message = "" );
 
-	/*!
-	 *
+	/**
 	 * @brief  Status code which is returned if bad
 	 * section name is asked
-	 *
 	 */
 	StatusCode CFGPARSER_MISSING_SECTION_NAME_ERROR( const std::string &message = "" );
 
-	/*!
-	 *
-	 * @brief  Status code returned for all generic parsing errors
-	 *
+	/**
+	 * @brief  Status code returned for all generic parsing error
 	 */
 	StatusCode CFGPARSER_PARSING_ERROR( const std::string &message = "" );
 
 
 
 
-	/*!
-	 *
+	/**
 	 * @brief CfgParserException class,
 	 * responsible to throw exception while using the CfgParser library classes
-	 *
 	 */
 	class CfgParserException : public std::exception {
 
-		protected :
-			std::string error;        ///< The error message
+	public:
 
-		public :
-			/*!
-			 *
-			 * @brief Thrown constructor
-			 *
-			 */
-			CfgParserException( const std::string &er ) throw()
-				: error(er)  {};
+		/**
+		 * @brief Thrown constructor
+		 */
+		CfgParserException( const std::string &er ) throw()
+			: error(er)  {};
 
-			/*!
-			 *
-			 * @brief Default destructor
-			 *
-			 */
-			virtual ~CfgParserException() throw() {};
+		/**
+		 * @brief Default destructor
+		 */
+		virtual ~CfgParserException() throw() {};
 
-			/*!
-			 *
-			 * @brief Return the exception message.
-			 *
-			 */
-			virtual const char* what() const throw()
-					{ return error.c_str(); }
+		/**
+		 * @brief Return the exception message.
+		 */
+		virtual const char* what() const throw()
+				{ return error.c_str(); }
+
+
+	protected :
+		std::string error;        ///< The error message
 	};
 
 

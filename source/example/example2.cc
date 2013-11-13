@@ -47,6 +47,8 @@
 #include <locale>
 #include <cstdlib>
 
+//#include <valgrind/memcheck.h>
+
 using namespace std;
 using namespace cfgparser;
 
@@ -69,24 +71,22 @@ int main( int argc , char *argv[] ) {
 
 	cout << "Creating a section called \"BasicSection\"" << endl;
 	string basicSectionName("BasicSection");
-	CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , rawParser->CreateSection( basicSectionName ) );
+	rawParser->createSection( basicSectionName );
 
-	if( rawParser->HasSection( basicSectionName ) ) {
+	if( rawParser->hasSection( basicSectionName ) )
 		cout << basicSectionName + " has been created!" << endl;
-	}
 
 	cout << "Setting an option called \"anInteger\" to 42" << endl;
-	CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , rawParser->SetValue( basicSectionName , "anInteger" , 42 ) );
+	rawParser->setValue<int>( basicSectionName , "anInteger" , 42 );
 
 	cout << "Printing the created section :" << endl;
-	const Section *basicSection = rawParser->GetSection( basicSectionName );
-	basicSection->Print();
+	const Section *basicSection = rawParser->getSection( basicSectionName );
+	basicSection->print();
 
 	cout << "Generating cfg file with name \"" + fileName + "\"" << endl;
-	rawParser->Write( fileName );
+	rawParser->write( fileName );
 
 	delete rawParser;
-
 	return 0;
 }
 

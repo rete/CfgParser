@@ -65,11 +65,10 @@ int main( int argc , char *argv[] ) {
 
 	RawCfgParser *rawParser = new RawCfgParser();
 
-	CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , rawParser->Read( fileName ) );
-	CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , rawParser->GetValue( sectionName , optionName , &value ) );
+	rawParser->read( fileName );
 
 	// print the value
-	cout << value << endl;
+	cout << rawParser->getValue<string>( sectionName , optionName ) << endl;
 
 	delete rawParser;
 
