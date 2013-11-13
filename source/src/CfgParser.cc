@@ -42,30 +42,45 @@ namespace cfgparser {
 	 * Public member functions
 	 ****************************/
 
-	StatusCode ChainSection::GetValue( const std::string &option , string *value ) const {
+	ChainSection::ChainSection()
+		: _sectionCollection( new SectionCollection() )
+	{
 
-		for( unsigned int i=0 ; i<sectionCollection->size() ; i++ ) {
+	}
 
-			StatusCode st = sectionCollection->at(i)->GetValue( option , value );
-			if( st == CFGPARSER_INVALID_SECTION_KEY() )
+	ChainSection::~ChainSection()
+	{
+		_sectionCollection->clear();
+		delete _sectionCollection;
+	}
+
+	string ChainSection::getValue( const std::string &option ) const
+	{
+		string value = "";
+		for( auto i=0 ; i<_sectionCollection->size() ; i++ ) {
+
+			try{
+				value = _sectionCollection->at(i)->getValue<string>( option );
+				return std::move( value );
+			} catch ( CfgParserException &e ) {
+				value = "";
 				continue;
-			else if( st == CFGPARSER_SUCCESS() )
-				return st;
+			}
 		}
-		return CFGPARSER_INVALID_SECTION_KEY("Option '"+ option +"' not found in ChainSection");
+		return std::move( value );
 	}
 
 
-	StringCollection ChainSection::GetOptions() const {
-
+	StringCollection ChainSection::getOptions() const
+	{
 		StringCollection result;
 		StringCollection seen;
 
-		for( unsigned int i=0 ; i<sectionCollection->size() ; i++ ) {
+		for( unsigned int i=0 ; i<_sectionCollection->size() ; i++ ) {
 
-			OptionValueMap optValMap = sectionCollection->at(i)->GetOptionValueMap();
+			auto optValMap = _sectionCollection->at(i)->getOptionValueMap();
 
-			for( OptionValueMap::iterator it = optValMap.begin() ; it != optValMap.end() ; it++ ) {
+			for( auto it = optValMap.begin() ; it != optValMap.end() ; it++ ) {
 
 				if( std::find( seen.begin() , seen.end() , it->first ) == seen.end() ) {
 
@@ -79,13 +94,12 @@ namespace cfgparser {
 	}
 
 
-	bool ChainSection::HasOption( const std::string &opt ) const {
-
-		for( unsigned int i=0 ; i<sectionCollection->size() ; i++ ) {
-			if( sectionCollection->at(i)->HasOption( opt ) )
-				return true;
-		}
-		return false;
+	bool ChainSection::hasOption( const std::string &opt ) const
+	{
+		return ( std::find_if( _sectionCollection->begin()
+							, _sectionCollection->end()
+							, [&] (Section *s) -> bool { return s->hasOption( opt ); } )
+			!= _sectionCollection->end() );
 	}
 
 
@@ -95,48 +109,11 @@ namespace cfgparser {
 	 * Public member functions
 	 ****************************/
 
-	CfgParser::CfgParser() : RawCfgParser() {}
+	CfgParser::CfgParser()
+		: RawCfgParser()
+	{
 
-
-	StatusCode CfgParser::GetValue( const std::string& section , const std::string &opt , std::string *value , bool raw , Section *vars ) const {
-
-
-		string option = opt;
-		Section *sec = 0;
-
-		if( this->HasSection( section ) ) {
-			CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , RawCfgParser::GetSection( section , sec ) );
-		}
-		else {
-			if( section != DEFAULT_SECTION )
-				return CFGPARSER_NO_SECTION_ERROR("Section '"+section+"' not found");
-		}
-
-		// look up in successive sections in that order : vars -> section -> default
-		ChainSection *chainSection = new ChainSection();
-
-		if( vars != 0 )
-			chainSection->AddSection( vars );
-		if( sec != 0 ) {
-			chainSection->AddSection( sec );
-		}
-		if( !defaultSection->IsEmpty() )
-			chainSection->AddSection( defaultSection );
-
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , chainSection->GetValue( option , value ) );
-
-		if( raw ) {
-			return CFGPARSER_SUCCESS();
-			delete chainSection;
-		}
-		else {
-			CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->Interpolate( *value , chainSection , value ) );
-		}
-
-		delete chainSection;
-		return CFGPARSER_SUCCESS();
 	}
-
 
 //---------------------------------------------------------------------------------------------------------------
 
@@ -144,8 +121,8 @@ namespace cfgparser {
 	 * Private member functions
 	 ****************************/
 
-	StatusCode CfgParser::Interpolate( const std::string &str , const ChainSection *chainSection , std::string *value ) const {
-
+	StatusCode CfgParser::interpolate( const std::string &str , const ChainSection *chainSection , std::string *value ) const
+	{
 		string finalString = str;
 		string tempString = str;
 
@@ -166,9 +143,9 @@ namespace cfgparser {
 
 			string opt = finalString.substr( posOpen+2 , posClose - (posOpen+2) );
 
-			if( chainSection->HasOption( RawCfgParser::OptionXForm( opt ) ) ) {
+			if( chainSection->hasOption( RawCfgParser::optionXForm( opt ) ) ) {
 				string val;
-				CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , chainSection->GetValue( opt , &val ) );
+				val = chainSection->getValue( opt );
 				finalString.replace( posOpen , (posClose-posOpen)+2 , val );
 			}
 			else {

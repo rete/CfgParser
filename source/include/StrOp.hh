@@ -37,76 +37,277 @@
 #include <sstream>
 #include <map>
 #include <vector>
+#include <typeinfo>
 
 #include "ParserStatus.hh"
 
 namespace cfgparser {
 
 
-	/*!
-	 *
+	/**
 	 * @brief  Normalize the name
-	 *
 	 */
-	void NormalizeName( std::string *str );
+	void normalizeName( std::string *str );
 
 
-	/*!
-	 *
-	 * @brief  Trim leading and trailing spaces from the string 'str'
-	 *
+	/**
+	 * @brief Trims leading and trailing spaces from the string 'str'
 	 */
-	void StrTrim( std::string *str );
+	void strTrim( std::string *str );
 
-	/*!
-	 *
-	 * @brief  Trim trailing spaces from the string 'str'
-	 *
+	/**
+	 * @brief Trims trailing spaces from the string 'str'
 	 */
-	void RStrTrim( std::string *str );
+	void rStrTrim( std::string *str );
 
-	/*!
-	 *
-	 * @brief  Split the string in many string portion
+	/**
+	 * @brief Splits the string in many string portion
 	 * separated by a given delimiter
-	 *
 	 */
-	std::vector<std::string> Split( const std::string &str , const char delimiter = ' ' , int maxSplit = -1 );
+	std::vector<std::string> split( const std::string &str , const char delimiter = ' ' , int maxSplit = -1 );
 
-	/*!
-	 *
-	 * @brief  Lower the string
-	 *
+	/**
+	 * @brief Lowers the string
 	 */
-	std::string ToLower( const std::string &str );
+	std::string toLower( const std::string &str );
 
-	/*!
-	 *
-	 * @brief  Upper the string
-	 *
+	/**
+	 * @brief Uppers the string
 	 */
-	std::string ToUpper( const std::string &str );
+	std::string toUpper( const std::string &str );
 
-	/*!
-	 *
-	 * @brief  Find the section name in a complete
+	/**
+	 * @brief Finds the section name in a complete
 	 * line of cfgparser file
-	 *
 	 */
-	StatusCode GroupSectionName( const std::string &completeSectionLine , std::string &sectionName );
+	StatusCode groupSectionName( const std::string &completeSectionLine , std::string &sectionName );
 
-	/*!
-	 *
-	 * @brief  Find an option, its separator and its
+	/**
+	 * @brief Finds an option, its separator and its
 	 * associated value from a complete line of cfgparser file
-	 *
 	 */
-	StatusCode GroupOptionSeparatorAndValue( const std::string &parserLine , std::string &option , std::string &separator , std::string &value );
+	StatusCode groupOptionSeparatorAndValue( const std::string &parserLine , std::string &option , std::string &separator , std::string &value );
 
-	/*!
-	 *
+	/**
+	 * @brief Converts the string value into type T value. See template specialization in .cc
+	 */
+	template<typename T>
+	void convert( const std::string &value , T &convertedVal )
+	{
+
+		throw CfgParserException("Can't convert value type from string to " + std::string( typeid(T).name() ) + ". For available types, see doc.");
+	}
+
+
+
+	template<typename T>
+	std::string toString( const T& value )
+	{
+		throw CfgParserException("Can't convert value type from string to " + std::string( typeid(T).name() ) + ". For available types, see doc.");
+	}
+
+
+
+//	/**
+//	 * @brief Converts a string into type T
+//	 */
+//	template<typename T>
+//	T convert( const std::string &value ) {
+//
+//		throw CfgParserException("Can't convert value type from string to " + std::string( typeid(T).name() ) + ". For available types, see doc.");
+//	}
+//
+//	/**
+//	 * @brief Converts a string into type int
+//	 */
+//	template<>
+//	int convert( const std::string &value ) {
+//
+//		return std::move( atoi( value.c_str() ) );
+//	}
+//
+//	/**
+//	 * @brief Converts a string into type float
+//	 */
+//	template<>
+//	float convert( const std::string &value ) {
+//
+//		return std::move( atof( value.c_str() ) );
+//	}
+//
+//	/**
+//	 * @brief Converts a string into type double
+//	 */
+//	template<>
+//	double convert( const std::string &value ) {
+//
+//		return std::move( (double)atof( value.c_str() ) );
+//	}
+//
+//	/**
+//	 * @brief Converts a string into type bool
+//	 */
+//	template<>
+//	bool convert( const std::string &value ) {
+//
+//		if( value == "true" || value == "1" || value == "on" || value == "yes" )
+//			return true;
+//		else if ( value == "false" || value == "0" || value == "off" || value == "no" )
+//			return false;
+//		else
+//			throw CfgParserException( "Value error : No known conversion from" + value + " to boolean type." );
+//	}
+//
+//	/**
+//	 * @brief Converts a string into type vector<string>
+//	 */
+//	template<>
+//	std::vector<std::string> convert( const std::string &val ) {
+//
+//		std::vector<std::string> value;
+//		std::string s;
+//		char motif = ':';
+//
+//		for ( unsigned int i=0 ; i<val.size() ; i++ ) {
+//
+//			if( val[i] != motif )
+//				s.push_back( val[i] ) ;
+//			else {
+//				value.push_back( s );
+//				s = "";
+//			}
+//			if( i == val.size() - 1 )
+//				value.push_back( s );
+//		}
+//		return std::move( value );
+//	}
+//
+//	/**
+//	 * @brief Converts a string into type vector<int>
+//	 */
+//	template<>
+//	std::vector<int> convert( const std::string &val ) {
+//
+//		std::vector<int> value;
+//		std::string s;
+//		char motif = ':';
+//
+//		for (unsigned int i=0 ; i<val.size() ; i++) {
+//
+//			if( val[i] != motif )
+//				s.push_back( val[i] ) ;
+//			else {
+//				value.push_back( atoi( s.c_str() ) );
+//				s = "";
+//			}
+//			if( i == val.size() - 1 )
+//				value.push_back( atoi( s.c_str() ) );
+//		}
+//
+//		return std::move( value );
+//	}
+//
+//	/**
+//	 * @brief Converts a string into type vector<double>
+//	 */
+//	template<>
+//	std::vector<double> convert( const std::string &val ) {
+//
+//		std::vector<double> value;
+//		std::string s;
+//		char motif = ':';
+//
+//		for (unsigned int i=0 ; i<val.size() ; i++) {
+//
+//			if( val[i] != motif )
+//				s.push_back( val[i] ) ;
+//			else {
+//				value.push_back( atof( s.c_str() ) );
+//				s = "";
+//			}
+//			if( i == val.size() - 1 )
+//				value.push_back( atof( s.c_str() ) );
+//		}
+//
+//		return std::move( value );
+//	}
+//
+//	/**
+//	 * @brief Converts a string into type T
+//	 */
+//	template<>
+//	std::vector<float> convert( const std::string &val ) {
+//
+//		std::vector<float> value;
+//		std::string s;
+//		char motif = ':';
+//
+//		for (unsigned int i=0 ; i<val.size() ; i++) {
+//
+//			if( val[i] != motif )
+//				s.push_back( val[i] ) ;
+//			else {
+//				value.push_back( atof( s.c_str() ) );
+//				s = "";
+//			}
+//			if( i == val.size() - 1 )
+//				value.push_back( atof( s.c_str() ) );
+//		}
+//
+//		return std::move( value );
+//	}
+//
+//	/**
+//	 * @brief Converts a string into type vector<bool>
+//	 */
+//	template<>
+//	std::vector<bool> convert( const std::string &val ) {
+//
+//		std::vector<bool> value;
+//		std::string s;
+//		char motif = ':';
+//
+//		for (unsigned int i=0 ; i<val.size() ; i++) {
+//
+//			if( val[i] != motif )
+//				s.push_back( val[i] ) ;
+//			else {
+//
+//				if( s == "true" || s == "1" || s == "on" || s == "yes" )
+//					value.push_back( true );
+//				else if ( s == "false" || s == "0" || s == "off" || s == "no" )
+//					value.push_back( false );
+//				else
+//					throw CfgParserException("Value error : No known conversion from "+ val +" to boolean type.");
+//				s = "";
+//			}
+//			if( i == val.size() - 1 ) {
+//
+//				if( s == "true" || s == "1" || s == "on" || s == "yes" )
+//					value.push_back( true );
+//				else if ( s == "false" || s == "0" || s == "off" || s == "no" )
+//					value.push_back( false );
+//				else
+//					throw CfgParserException("Value error : No known conversion from "+ val +" to boolean type.");
+//			}
+//		}
+//
+//		return std::move( value );
+//	}
+//
+//	/**
+//	 * @brief Converts a type T into type string
+//	 */
+//	template<typename T>
+//	std::string convert( const T &value )
+//	{
+//		throw CfgParserException("Can't convert value type from " + std::string( typeid(T).name() ) + " to string. For available types, see doc.");
+//	}
+//
+
+
+	/**
 	 * @brief  Various typedefs
-	 *
 	 */
 	typedef std::vector<std::string> StringCollection;
 	typedef std::vector<const std::string> ConstStringCollection;

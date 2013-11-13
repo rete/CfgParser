@@ -36,7 +36,7 @@ using namespace std ;
 namespace cfgparser {
 
 
-	void StrTrim( string *str ) {
+	void strTrim( string *str ) {
 
 		// count leading spaces
 		int i = 0;
@@ -56,7 +56,7 @@ namespace cfgparser {
 	}
 
 
-	void RStrTrim( std::string *str ) {
+	void rStrTrim( std::string *str ) {
 
 		int i = str->length();
 
@@ -68,10 +68,10 @@ namespace cfgparser {
 	}
 
 
-	void NormalizeName(string *str) {
+	void normalizeName(string *str) {
 
 		// trim spaces
-		StrTrim(str);
+		strTrim(str);
 
 		unsigned int i, j;
 		i = 0;
@@ -100,7 +100,7 @@ namespace cfgparser {
 	}
 
 
-	std::vector<std::string> Split( const std::string &str , const char delimiter , int maxSplit ) {
+	std::vector<std::string> split( const std::string &str , const char delimiter , int maxSplit ) {
 
 		std::vector<std::string> vec;
 		string s;
@@ -126,16 +126,16 @@ namespace cfgparser {
 	}
 
 
-	string ToLower( const string &str ) {
+	string toLower( const string &str ) {
 
 		string s;
 		for( unsigned int i=0 ; i<str.size() ; i++ )
 			s.push_back( tolower( str.at(i) ) );
-		return s;
+		return std::move( s );
 	}
 
 
-	string ToUpper( const string &str ) {
+	string toUpper( const string &str ) {
 
 		string s;
 		for( unsigned int i=0 ; i<str.size() ; i++ )
@@ -144,12 +144,12 @@ namespace cfgparser {
 	}
 
 
-	StatusCode GroupSectionName( const string &completeSectionLine , string &sectionName ) {
+	StatusCode groupSectionName( const string &completeSectionLine , string &sectionName ) {
 
 		// read the section name
 		sectionName.clear();
 		string sectionLine = completeSectionLine;
-		StrTrim( &sectionLine );
+		strTrim( &sectionLine );
 
 		if( sectionLine.empty() )
 			return CFGPARSER_ERROR("Section name is empty");
@@ -168,16 +168,16 @@ namespace cfgparser {
 			sectionName += sectionLine.at( i );
 		}
 
-		StrTrim( &sectionName );
+		strTrim( &sectionName );
 
 		return CFGPARSER_SUCCESS();
 	}
 
 
-	StatusCode GroupOptionSeparatorAndValue( const string &parserLine , string &option , string &separator , string &value ) {
+	StatusCode groupOptionSeparatorAndValue( const string &parserLine , string &option , string &separator , string &value ) {
 
 		string line = parserLine;
-		StrTrim( &line );
+		strTrim( &line );
 
 		if( line.empty() )
 			return CFGPARSER_ERROR( "Parser line is empty!" );
@@ -196,14 +196,14 @@ namespace cfgparser {
 				if( option.empty() )
 					CFGPARSER_PARSING_ERROR("No option specified in line : '"+ parserLine +"'");
 
-				StrTrim( &option );
+				strTrim( &option );
 				separator = line.at(i);
 
 				if( line.size() <= i+2 )
 					return CFGPARSER_PARSING_ERROR("No value after key '"+ option +"'");
 
 				value = line.substr( i+1 );
-				StrTrim( &value );
+				strTrim( &value );
 				if( value.empty() )
 					return CFGPARSER_PARSING_ERROR("No value after key '"+ option +"'");
 				break;
@@ -212,6 +212,275 @@ namespace cfgparser {
 		}
 		return CFGPARSER_SUCCESS();
 	}
+
+
+
+
+
+	template<>
+	void convert( const std::string &value , int &convertedVal ) {
+
+		convertedVal = std::move( atoi( value.c_str() ) );
+	}
+
+
+	template<>
+	void convert( const std::string &value , double &convertedVal ) {
+
+		convertedVal = std::move( (double)atof( value.c_str() ) );
+	}
+
+
+	template<>
+	void convert( const std::string &value , float &convertedVal ) {
+
+		convertedVal = std::move( atof( value.c_str() ) );
+	}
+
+
+	template<>
+	void convert( const std::string &value , bool &convertedVal ) {
+
+		if( value == "true" || value == "1" || value == "on" || value == "yes" )
+			convertedVal = true;
+		else if ( value == "false" || value == "0" || value == "off" || value == "no" )
+			convertedVal = false;
+		else
+			throw CfgParserException( "Value error : No known conversion from" + value + " to boolean type." );
+	}
+
+
+	template<>
+	void convert( const std::string &val , std::vector<std::string> &convertedVal ) {
+
+		convertedVal.clear();
+		std::string s;
+		char motif = ':';
+
+		for ( unsigned int i=0 ; i<val.size() ; i++ ) {
+
+			if( val[i] != motif )
+				s.push_back( val[i] ) ;
+			else {
+				convertedVal.push_back( s );
+				s = "";
+			}
+			if( i == val.size() - 1 )
+				convertedVal.push_back( s );
+		}
+	}
+
+	/**
+	 * @brief Converts a string into type vector<int>
+	 */
+	template<>
+	void convert( const std::string &val , std::vector<int> &convertedVal ) {
+
+		convertedVal.clear();
+		std::string s;
+		char motif = ':';
+
+		for (unsigned int i=0 ; i<val.size() ; i++) {
+
+			if( val[i] != motif )
+				s.push_back( val[i] ) ;
+			else {
+				convertedVal.push_back( atoi( s.c_str() ) );
+				s = "";
+			}
+			if( i == val.size() - 1 )
+				convertedVal.push_back( atoi( s.c_str() ) );
+		}
+	}
+
+	/**
+	 * @brief Converts a string into type vector<double>
+	 */
+	template<>
+	void convert( const std::string &val , std::vector<double> &convertedVal ) {
+
+		convertedVal.clear();
+		std::string s;
+		char motif = ':';
+
+		for (unsigned int i=0 ; i<val.size() ; i++) {
+
+			if( val[i] != motif )
+				s.push_back( val[i] ) ;
+			else {
+				convertedVal.push_back( atof( s.c_str() ) );
+				s = "";
+			}
+			if( i == val.size() - 1 )
+				convertedVal.push_back( atof( s.c_str() ) );
+		}
+	}
+
+	/**
+	 * @brief Converts a string into type T
+	 */
+	template<>
+	void convert( const std::string &val , std::vector<float> &convertedVal ) {
+
+		convertedVal.clear();
+		std::string s;
+		char motif = ':';
+
+		for (unsigned int i=0 ; i<val.size() ; i++) {
+
+			if( val[i] != motif )
+				s.push_back( val[i] ) ;
+			else {
+				convertedVal.push_back( atof( s.c_str() ) );
+				s = "";
+			}
+			if( i == val.size() - 1 )
+				convertedVal.push_back( atof( s.c_str() ) );
+		}
+	}
+
+	/**
+	 * @brief Converts a string into type vector<bool>
+	 */
+	template<>
+	void convert( const std::string &val , std::vector<bool> &convertedVal ) {
+
+		convertedVal.clear();
+		std::string s;
+		char motif = ':';
+
+		for (unsigned int i=0 ; i<val.size() ; i++) {
+
+			if( val[i] != motif )
+				s.push_back( val[i] ) ;
+			else {
+
+				if( s == "true" || s == "1" || s == "on" || s == "yes" )
+					convertedVal.push_back( true );
+				else if ( s == "false" || s == "0" || s == "off" || s == "no" )
+					convertedVal.push_back( false );
+				else
+					throw CfgParserException("Value error : No known conversion from "+ val +" to boolean type.");
+				s = "";
+			}
+			if( i == val.size() - 1 ) {
+
+				if( s == "true" || s == "1" || s == "on" || s == "yes" )
+					convertedVal.push_back( true );
+				else if ( s == "false" || s == "0" || s == "off" || s == "no" )
+					convertedVal.push_back( false );
+				else
+					throw CfgParserException("Value error : No known conversion from "+ val +" to boolean type.");
+			}
+		}
+	}
+
+
+	template<>
+	std::string toString( const int &value )
+	{
+		std::stringstream ss;
+		ss << value;
+		return std::move( ss.str() );
+	}
+
+
+	template<>
+	std::string toString( const float &value )
+	{
+		std::stringstream ss;
+		ss << value;
+		return std::move( ss.str() );
+	}
+
+
+	template<>
+	std::string toString( const double &value )
+	{
+		std::stringstream ss;
+		ss << value;
+		return std::move( ss.str() );
+	}
+
+
+	template<>
+	std::string toString( const bool &value )
+	{
+		std::stringstream ss;
+		ss << value;
+		return std::move( ss.str() );
+	}
+
+
+	template<>
+	std::string toString( const std::vector<std::string> &value )
+	{
+		std::string ss;
+		for( auto i=0 ; i<value.size() ; i++ ) {
+			ss += value.at(i);
+			if( i != value.size() - 1 )
+				ss += ':';
+		}
+
+		return std::move( ss );
+	}
+
+
+	template<>
+	std::string toString( const std::vector<int> &value )
+	{
+		std::stringstream ss;
+		for( auto i=0 ; i<value.size() ; i++ ) {
+			ss << value.at(i);
+			if( i != value.size() - 1 )
+				ss << ':';
+		}
+		return std::move( ss.str() );
+	}
+
+
+	template<>
+	std::string toString( const std::vector<float> &value )
+	{
+		std::stringstream ss;
+		for( auto i=0 ; i<value.size() ; i++ ) {
+			ss << value.at(i);
+			if( i != value.size() - 1 )
+				ss << ':';
+		}
+
+		return std::move( ss.str() );
+	}
+
+
+	template<>
+	std::string toString( const std::vector<double> &value )
+	{
+		std::stringstream ss;
+		for( auto i=0 ; i<value.size() ; i++ ) {
+			ss << value.at(i);
+			if( i != value.size() - 1 )
+				ss << ':';
+		}
+
+		return std::move( ss.str() );
+	}
+
+
+	template<>
+	std::string toString( const std::vector<bool> &value )
+	{
+		std::stringstream ss;
+		for( auto i=0 ; i<value.size() ; i++ ) {
+			ss << value.at(i);
+			if( i != value.size() - 1 )
+				ss << ':';
+		}
+
+		return std::move( ss.str() );
+	}
+
+
 
 
 }  //  end namespace cfgparser

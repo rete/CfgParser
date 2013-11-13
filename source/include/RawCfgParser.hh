@@ -47,8 +47,7 @@
 namespace cfgparser {
 
 
-	/*!
-	 *
+	/**
 	 * @brief Class RawCfgParser
 	 * Parse and write configuration file in an ini format.
 	 *
@@ -71,329 +70,204 @@ namespace cfgparser {
 	 * via this class. A section is got as a constant
 	 * object so that it can't be modified without the
 	 * parser instance.
-	 *
 	 */
 
 	class RawCfgParser {
 
-		public:
+	public:
 
-			/*!
-			 *
-			 * @brief  Default Constructor
-			 * Option/value pairs can be passed for the default section
-			 * The flag 'allowNoValue' allows to set and read an option
-			 * with no value (disabled by default).
-			 *
-			 */
-			RawCfgParser( const OptionValueMap *optionValueMap = 0 , bool allowNoValue = false );
+		/**
+		 * @brief Default Constructor
+		 * Option/value pairs can be passed for the default section
+		 * The flag 'allowNoValue' allows to set and read an option
+		 * with no value (disabled by default).
+		 */
+		RawCfgParser( const OptionValueMap *optionValueMap = nullptr , bool allowNoValue = false );
 
-			/*!
-			 *
-			 * @brief  Default Destructor
-			 *
-			 */
-			virtual ~RawCfgParser();
+		/**
+		 * @brief Copy constructor
+		 */
+		RawCfgParser( const RawCfgParser &parser );
 
-			/*!
-			 *
-			 * @brief  Create a section in the parser.
-			 *
-			 */
-			StatusCode CreateSection( const std::string &secName );
+		/**
+		 * @brief
+		 */
+		RawCfgParser( RawCfgParser &&parser );
 
-			/*!
-			 *
-			 * @brief  Get a string value with a given section name and option name
-			 *
-			 */
-			virtual StatusCode GetValue( const std::string& section , const std::string &key, std::string *value ) const;
+		/**
+		 * @brief Default Destructor
+		 */
+		virtual ~RawCfgParser();
 
-			/*!
-			 *
-			 * @brief  Get an int value with a given section name and option name
-			 *
-			 */
-			StatusCode GetValue( const std::string& section , const std::string &key, int *value ) const;
+		/**
+		 * @brief Create a section in the parser
+		 */
+		void createSection( const std::string &secName );
 
-			/*!
-			 *
-			 * @brief  Get a double value with a given section name and option name
-			 *
-			 */
-			StatusCode GetValue( const std::string& section , const std::string &key, double *value ) const;
+		/**
+		 * @brief Adds a section to current section collection.
+		 * Simply do additional checks
+		 */
+		void addSection( Section *section );
 
-			/*!
-			 *
-			 * @brief  Get a boolean value with a given section name and option name
-			 *
-			 */
-			StatusCode GetValue( const std::string& section , const std::string &key, bool *value ) const;
+		/**
+		 * @brief Get a value with a type T
+		 */
+		template<typename T>
+		T getValue( const std::string& sectionName , const std::string &key ) const
+		{
+			Section *section = nullptr;
+			CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->getSection( sectionName , section ) );
+			std::string value = section->getValue<T>( key );
+			T finalVal;
+			cfgparser::convert<T>( value , finalVal );
+			return std::move( finalVal );
+		}
 
-			/*!
-			 *
-			 * @brief  Get a string vector with a given section name and option name
-			 *
-			 */
-			StatusCode GetValue( const std::string& section , const std::string &key, std::vector< std::string > *value ) const;
+		/**
+		 * @brief Returns true if the the given section has the given option.
+		 */
+		bool hasOption( const std::string &sectionName , const std::string &key ) const;
 
-			/*!
-			 *
-			 * @brief  Get an int vector with a given section name and option name
-			 *
-			 */
-			StatusCode GetValue( const std::string& section , const std::string &key, std::vector< int > *value ) const;
+		/**
+		 * @brief Returns true if the parser instance contains the given section
+		 */
+		bool hasSection( const std::string &secName ) const;
 
-			/*!
-			 *
-			 * @brief  Get a double vector with a given section name and option name
-			 *
-			 */
-			StatusCode GetValue( const std::string& section , const std::string &key, std::vector< double > *value ) const;
+		/**
+		 * @brief Returns true if the parser instance contains the given section
+		 */
+		bool hasSection( const Section *section ) const;
 
-			/*!
-			 *
-			 * @brief  Get a bool vector with a given section name and option name
-			 *
-			 */
-			StatusCode GetValue( const std::string& section , const std::string &key, std::vector< bool > *value ) const;
+		/**
+		 * @brief Returns the given section. Throw if the section doesn't exists.
+		 */
+		const Section *getSection( const std::string &sectionName ) const;
 
-			/*!
-			 *
-			 * @brief  Return true if the the given section has the given option.
-			 *
-			 */
-			bool HasOption( const std::string &sectionName , const std::string &key ) const;
+		/**
+		 * @brief Reads the given file in the ini format style.
+		 */
+		void read( const std::string &fileName );
 
-			/*!
-			 *
-			 * @brief  Return true if the parser instance contains the given section
-			 *
-			 */
-			bool HasSection( const std::string &secName ) const;
+		/**
+		 * @brief Reads the given file in the ini format style.
+		 */
+		void read( const std::vector< std::string > &fileNames );
 
-			/*!
-			 *
-			 * @brief  Return true if the parser instance contains the given section
-			 *
-			 */
-			bool HasSection( const Section *section ) const;
+		/**
+		 * @brief Reads the given file in the ini format style.
+		 */
+		void read( std::ifstream& stream );
 
-			/*!
-			 *
-			 * @brief  Return the given section. Throw if the section doesn't exists.
-			 *
-			 */
-			const Section *GetSection( const std::string &sectionName ) const;
+		/**
+		 * @brief Reads the given file in the ini format style.
+		 */
+		void read( std::ifstream* stream );
 
-			/*!
-			 *
-			 * @brief  Read the given file in the ini format style.
-			 *
-			 */
-			StatusCode Read( const std::string &fileName );
+		/**
+		 * @brief Removes an option from a given section
+		 */
+		void removeOption( const std::string &sectionName , const std::string &opt );
 
-			/*!
-			 *
-			 * @brief  Read the given file in the ini format style.
-			 *
-			 */
-			StatusCode Read( const std::vector< std::string > &fileNames );
+		/**
+		 * @brief Removes a section from the parser instance
+		 */
+		void removeSection( const std::string &sectionName );
 
-			/*!
-			 *
-			 * @brief  Read the given file in the ini format style.
-			 *
-			 */
-			StatusCode Read( std::ifstream& stream );
+		/**
+		 * @brief Set a value in the given section and a given option
+		 */
+		template<typename T>
+		void setValue( const std::string& sectionName , const std::string &key, const T &value )
+		{
+			Section *section = nullptr;
+			CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->getSection( sectionName , section ) );
+			section->setValue<T>( key , value );
+		}
 
-			/*!
-			 *
-			 * @brief  Read the given file in the ini format style.
-			 *
-			 */
-			StatusCode Read( std::ifstream* stream );
+		/**
+		 * @brief Writes all the default section and all the sections in the given file in an ini standard format
+		 */
+		void write( const std::string &fileName ) const;
 
-			/*!
-			 *
-			 * @brief  Remove an option from a given section
-			 *
-			 */
-			StatusCode RemoveOption( const std::string &sectionName , const std::string &opt );
+		/**
+		 * @brief Writes all the default section and all the sections in the given stream file instance in an ini standard format
+		 */
+		void write( std::ofstream& stream ) const;
 
-			/*!
-			 *
-			 * @brief  Remove a section from the parser instance
-			 *
-			 */
-			StatusCode RemoveSection( const std::string &sectionName );
+		/**
+		 * @brief Writes all the default section and all the sections in the given stream file instance in an ini standard format
+		 */
+		void write( std::ofstream* stream ) const;
 
-			/*!
-			 *
-			 * @brief  Set a string value in the given section and a given option
-			 *
-			 */
-			StatusCode SetValue( const std::string& section , const std::string &key, const std::string &value );
+		/**
+		 * @brief Prints the sections in the console ( default section and all sections )
+		 */
+		void print() const;
 
-			/*!
-			 *
-			 * @brief  Set an int value in the given section and a given option
-			 *
-			 */
-			StatusCode SetValue( const std::string& section , const std::string &key, const int &value );
+		/**
+		 * @brief Returns the option name after a 'ToLower' operation
+		 */
+		std::string optionXForm( const std::string &optionStr ) const;
 
-			/*!
-			 *
-			 * @brief  Set a double value in the given section and a given option
-			 *
-			 */
-			StatusCode SetValue( const std::string& section , const std::string &key, const double &value );
+		/**
+		 * @brief Returns the options of the given section. Throw if the sections doesn't exists.
+		 */
+		const StringCollection getOptions( const std::string &secName ) const;
 
-			/*!
-			 *
-			 * @brief  Set a boolean value in the given section and a given option
-			 *
-			 */
-			StatusCode SetValue( const std::string& section , const std::string &key, const bool &value );
+		/**
+		 * @brief Returns all the values of the given section
+		 */
+		const StringCollection getValues( const std::string &secName ) const;
 
-			/*!
-			 *
-			 * @brief  Set a string vector in the given section and a given option
-			 *
-			 */
-			StatusCode SetValue( const std::string& section , const std::string &key, const std::vector< std::string > &value );
+		/**
+		 * @brief Clears the parser content.
+		 */
+		void clear();
 
-			/*!
-			 *
-			 * @brief  Set an int vector in the given section and a given option
-			 *
-			 */
-			StatusCode SetValue( const std::string& section , const std::string &key, const std::vector< int > &value );
+		/**
+		 * @brief Returns the default section
+		 */
+		const Section *getDefaultSection()
+		{
+			return _defaultSection;
+		}
 
-			/*!
-			 *
-			 * @brief  Set a double vector in the given section and a given option
-			 *
-			 */
-			StatusCode SetValue( const std::string& section , const std::string &key, const std::vector< double > &value );
-
-			/*!
-			 *
-			 * @brief  Set a boolean vector in the given section and a given option
-			 *
-			 */
-			StatusCode SetValue( const std::string& section , const std::string &key, const std::vector< bool > &value );
-
-			/*!
-			 *
-			 * @brief  Write all the default section and all the sections in the given file in an ini standard format
-			 *
-			 */
-			StatusCode Write( const std::string &fileName ) const;
-
-			/*!
-			 *
-			 * @brief  Write all the default section and all the sections in the given stream file instance in an ini standard format
-			 *
-			 */
-			StatusCode Write( std::ofstream& stream ) const;
-
-			/*!
-			 *
-			 * @brief  Write all the default section and all the sections in the given stream file instance in an ini standard format
-			 *
-			 */
-			StatusCode Write( std::ofstream* stream ) const;
-
-			/*!
-			 *
-			 * @brief  Print the sections in the console ( default section and all sections )
-			 *
-			 */
-			StatusCode Print() const;
-
-			/*!
-			 *
-			 * @brief  Return the option name after a 'ToLower' operation
-			 *
-			 */
-			std::string OptionXForm( const std::string &optionStr ) const;
-
-			/*!
-			 *
-			 * @brief  Return the options of the given section. Throw if the sections doesn't exists.
-			 *
-			 */
-			const StringCollection GetOptions( const std::string &secName ) const;
-
-			/*!
-			 *
-			 * @brief  Return all the values of the given section
-			 *
-			 */
-			const StringCollection GetValues( const std::string &secName ) const;
-
-			/*!
-			 *
-			 * @brief  Clear the parser content.
-			 *
-			 */
-			StatusCode Clear();
+		/**
+		 * @brief Returns the sections
+		 */
+		const SectionCollection *getSections()
+		{
+			return _sections;
+		}
 
 
-		// inline member functions
-		public:
+	// protected member functions
+	protected:
 
-			/*!
-			 *
-			 * @brief  Return the default section
-			 *
-			 */
-			const Section *GetDefaultSection()
-				{ return defaultSection; }
+		/**
+		 * @brief Reads the given file in the ini format style. Private method containing the reading algorithm
+		 */
+		StatusCode _read( std::ifstream* stream );
 
-			/*!
-			 *
-			 *
-			 *
-			 */
-			SectionCollection *GetSections()
-				{ return sections; }
+		/**
+		 * @brief Writes all the default section and all the sections in the given stream file instance in an ini standard format
+		 */
+		StatusCode _write( std::ofstream* stream ) const;
 
-
-		// protected member functions
-		protected:
-
-			/*!
-			 *
-			 * @brief  Add a section to current section collection.
-			 * Simply do additional checks
-			 *
-			 */
-			StatusCode AddSection( Section *section );
-
-			/*!
-			 *
-			 * @brief  Read the given file in the ini format style. Private method containing the reading algorithm
-			 *
-			 */
-			StatusCode _Read( std::ifstream* stream );
-
-			/*!
-			 *
-			 * @brief  Get a section with a given name
-			 *
-			 */
-			StatusCode GetSection( const std::string &sectionName , Section *&sec ) const;
+		/**
+		 * @brief Gets a section with a given name
+		 */
+		StatusCode getSection( const std::string &sectionName , Section *sec ) const;
 
 
-		// protected members
-		protected:
+	// protected members
+	protected:
 
-			SectionCollection *sections;                       ///< The sections in the parser instance.
-			Section *defaultSection;                           ///< The default section.
-			static const std::string DEFAULT_SECTION;        ///< The default section name.
-			bool allowNoValue;                                ///< True if allows no value for a given option
+		SectionCollection *_sections;                       ///< The sections in the parser instance.
+		Section *_defaultSection;                           ///< The default section.
+		static const std::string DEFAULT_SECTION;         ///< The default section name.
+		bool _allowNoValue;                                ///< True if allows no value for a given option
 
 
 	};  // class

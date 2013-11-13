@@ -54,10 +54,9 @@ namespace cfgparser {
 	typedef std::vector<const Section *> ConstSectionCollection;
 
 
-	/*!
-	 *
+	/**
 	 * @brief  Section class,
-	 * represent a config section in cfg file.
+	 * represents a config section in cfg file.
 	 *
 	 * A section has a name and a set of option/value
 	 * pairs of various types. These values can be
@@ -65,253 +64,132 @@ namespace cfgparser {
 	 * A value can be set only by using a parser
 	 * instance so that a section can't exists
 	 * without any parser instance.
-	 *
 	 */
 
 	class Section {
 
-		public:
+	// protected members
+	protected :
 
-			/*!
-			 *
-			 * @brief  Constructor with section name
-			 *
-			 */
-			Section( const std::string &n );
+		std::string _name;                           ///< The section name
+		OptionValueMap _optionValueMap;              ///< The option/value pairs
 
-			/*!
-			 *
-			 * @brief  Default Destructor
-			 *
-			 */
-			virtual ~Section();
+	// public member functions
+	public:
 
-			/*!
-			 *
-			 * @brief Copy constructor
-			 *
-			 */
-			Section( const Section &section );
+		/**
+		 * @brief Default constructor deleted
+		 */
+		Section() = delete;
 
+		/**
+		 * @brief Constructor with section name
+		 */
+		Section( const std::string &n );
 
-		// protected members
-		protected :
+		/**
+		 * @brief Default Destructor
+		 */
+		~Section();
 
-			std::string name;                           ///< The section name
-			OptionValueMap optionValueMap;              ///< The option/value pairs
+		/**
+		 * @brief Copy constructor
+		 */
+		Section( const Section &section );
 
+		/**
+		 * @brief Move constructor
+		 */
+		Section( Section &&section );
 
-		// public member functions
-		public:
+		/**
+		 * @brief Returns a value with type T
+		 */
+		template<typename T>
+		T getValue( const std::string &key ) const
+		{
+			T finalVal;
+			std::string value = getValue<std::string>( key );
+			cfgparser::convert< T >( value , finalVal );
+			return std::move( finalVal );
+		}
 
-			/*!
-			 *
-			 * @brief  Return the section name
-			 *
-			 */
-			inline const std::string GetName() const
-				{ return name; }
+		/**
+		 * @brief Set a value with type T
+		 */
+		template<typename T>
+		void setValue( const std::string &key , const T &value )
+		{
+			if( key.empty() )
+				return;
 
-			/*!
-			 *
-			 * @brief  Return a string value
-			 *
-			 */
-			StatusCode GetValue( const std::string &option , std::string *value ) const;
+			_optionValueMap[ key ] = std::move( cfgparser::toString<T>( value ) );
+		}
 
-			/*!
-			 *
-			 * @brief  Return an int value
-			 *
-			 */
-			StatusCode GetValue( const std::string &option , int *value ) const;
+		/**
+		 * @brief Returns true if the section contains the given option
+		 */
+		bool hasOption( const std::string &opt ) const;
 
-			/*!
-			 *
-			 * @brief  Return a double value
-			 *
-			 */
-			StatusCode GetValue( const std::string &option , double *value ) const;
+		/**
+		 * @brief Returns true if the section is empty
+		 */
+		bool isEmpty() const;
 
-			/*!
-			 *
-			 * @brief  Return a bool value
-			 *
-			 */
-			StatusCode GetValue( const std::string &option , bool *value ) const;
+		/**
+		 * @brief Print the section with all option-value pairs
+		 */
+		void print() const;
 
-			/*!
-			 *
-			 * @brief  Return a string vector value
-			 *
-			 */
-			StatusCode GetValue( const std::string &option , std::vector<std::string> *value ) const;
+		/**
+		 * @brief Remove an option from the section
+		 */
+		void removeOption( const std::string &opt );
 
-			/*!
-			 *
-			 * @brief  Return a double vector value
-			 *
-			 */
-			StatusCode GetValue( const std::string &option , std::vector<double> *value ) const;
+		/**
+		 * @brief Clear the section
+		 */
+		void clear();
 
-			/*!
-			 *
-			 * @brief  Return an int vector value
-			 *
-			 */
-			StatusCode GetValue( const std::string &option , std::vector<int> *value ) const;
+		/**
+		 * @brief Set the section name
+		 */
+		inline void setName( const std::string &n )
+		{
+			_name = n;
+		}
 
-			/*!
-			 *
-			 * @brief  Return a bool vector value
-			 *
-			 */
-			StatusCode GetValue( const std::string &option , std::vector<bool> *value ) const;
+		/**
+		 * @brief Returns the section name
+		 */
+		inline const std::string &getName() const
+		{
+			return _name;
+		}
 
-			/*!
-			 *
-			 * @brief  Return true if the section contains the given option
-			 *
-			 */
-			bool HasOption( const std::string &opt ) const;
+		/**
+		 * @brief Returns the Option/Value map containing all option-value pairs.
+		 */
+		inline const OptionValueMap &getOptionValueMap() const
+		{
+			return _optionValueMap;
+		}
 
-			/*!
-			 *
-			 * @brief  Return true if the section is empty
-			 *
-			 */
-			bool IsEmpty() const;
+		/**
+		 * @brief  Operator to add section
+		 */
+		Section& operator +=( const Section& section );
 
-			/*!
-			 *
-			 * @brief  Print the section with all option-value pairs
-			 *
-			 */
-			StatusCode Print() const;
-
-
-		// inline public member functions
-		public:
-
-			/*!
-			 *
-			 * @brief  Return the Option/Value map containing all option-value pairs.
-			 *
-			 */
-			inline const OptionValueMap GetOptionValueMap() const
-				{ return optionValueMap; }
-
-
-		protected:
-
-			/*!
-			 *
-			 * @brief  Clear the section
-			 *
-			 */
-			StatusCode Clear();
-
-			/*!
-			 *
-			 * @brief  Operator to add section
-			 *
-			 */
-			Section& operator +=( const Section& section );
-
-			/*!
-			 *
-			 * @brief  Delete a a option from the section
-			 *
-			 */
-			StatusCode RemoveOption( const std::string &opt );
-
-			/*!
-			 *
-			 * @brief  Set the given option with a string value
-			 *
-			 */
-			StatusCode SetValue( const std::string &option , const std::string &value );
-
-			/*!
-			 *
-			 * @brief  Set the given option with an int value
-			 *
-			 */
-			StatusCode SetValue( const std::string &option, const int &value );
-
-			/*!
-			 *
-			 * @brief  Set the given option with a double value
-			 *
-			 */
-			StatusCode SetValue( const std::string &option, const double &value );
-
-			/*!
-			 *
-			 * @brief  Set the given option with a bool value
-			 *
-			 */
-			StatusCode SetValue( const std::string &option, const bool &value );
-
-			/*!
-			 *
-			 * @brief  Set the given option with a string vector value
-			 *
-			 */
-			StatusCode SetValue( const std::string &option, const std::vector< std::string > &value );
-
-			/*!
-			 *
-			 * @brief  Set the given option with an int vector value
-			 *
-			 */
-			StatusCode SetValue( const std::string &option, const std::vector< int > &value );
-
-			/*!
-			 *
-			 * @brief  Set the given option with a double vector value
-			 *
-			 */
-			StatusCode SetValue( const std::string &option, const std::vector< double > &value );
-
-			/*!
-			 *
-			 * @brief  Set the given option with a bool vector value
-			 *
-			 */
-			StatusCode SetValue( const std::string &option, const std::vector< bool > &value );
-
-
-		// inline private member functions
-		private:
-
-			/*!
-			 *
-			 * @brief  Set the section name
-			 *
-			 */
-			inline void SetName( const std::string &n )
-				{ name = n;}
-
-			// friend classes
-			friend class RawCfgParser;
-			friend class CfgParser;
-			friend class SafeCfgParser;
-
-			/*!
-			 *
-			 * @brief  'Addition' operator
-			 *
-			 */
-			friend Section operator +( Section const& section1, Section const& section2 );
+		/**
+		 * @brief 'Addition' operator
+		 */
+		friend Section operator +( Section const& section1, Section const& section2 );
 
 
 	};  // class
 
-	/*!
-	 *
-	 * @brief  Operator to add section. Keep the name of the first section
-	 *
+	/**
+	 * @brief Operator to add section. Keep the name of the first section
 	 */
 	Section operator+ ( Section const& section1, Section const& section2 );
 

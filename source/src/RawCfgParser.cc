@@ -42,331 +42,218 @@ namespace cfgparser {
 	 * Public member functions
 	 ****************************/
 
-	RawCfgParser::RawCfgParser( const OptionValueMap *optionValueMap , bool allowNoValue ) {
+	RawCfgParser::RawCfgParser( const OptionValueMap *optionValueMap , bool allowNoValue )
+	{
+		_defaultSection = new Section( DEFAULT_SECTION );
 
-		defaultSection = new Section( DEFAULT_SECTION );
-
-		if( optionValueMap != 0  && !optionValueMap->empty() ) {
+		if( optionValueMap != nullptr  && !optionValueMap->empty() ) {
 			for( OptionValueMap::const_iterator it = optionValueMap->begin() ; it != optionValueMap->end() ; it++ ) {
-				CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , defaultSection->SetValue( it->first , it->second ) );
+				_defaultSection->setValue<string>( it->first , it->second );
 			}
 		}
-		this->allowNoValue = allowNoValue;
-		sections = new SectionCollection();
+		_allowNoValue = allowNoValue;
+		_sections = new SectionCollection();
 	}
 
 
-	RawCfgParser::~RawCfgParser() {
+	RawCfgParser::RawCfgParser( const RawCfgParser &parser )
+	{
+		_defaultSection = new Section( *(parser._defaultSection) );
+		_sections = new SectionCollection();
 
-		for( unsigned int i=0 ; i<sections->size() ; i++ ) {
-			if( sections->at(i) != 0 ) {
-				delete sections->at(i);
-				sections->at(i) = 0;
-			}
+		for( auto i=0 ; i<parser._sections->size() ; i++ ) {
+			_sections->push_back( new Section( *(parser._sections->at(i)) ) );
 		}
-		sections->clear();
-		delete sections;
-		delete defaultSection;
+		_allowNoValue = parser._allowNoValue;
 	}
 
 
-	StatusCode RawCfgParser::CreateSection( const std::string &secName ) {
+	RawCfgParser::RawCfgParser( RawCfgParser &&parser )
+	{
+		_defaultSection = parser._defaultSection;
+		_sections = parser._sections;
+		parser._defaultSection = nullptr;
+		parser._sections = nullptr;
+		_allowNoValue = parser._allowNoValue;
+	}
 
+
+	RawCfgParser::~RawCfgParser()
+	{
+		for( unsigned int i=0 ; i<_sections->size() ; i++ ) {
+			if( _sections->at(i) != nullptr ) {
+				delete _sections->at(i);
+				_sections->at(i) = nullptr;
+			}
+		}
+		_sections->clear();
+		delete _sections;
+		delete _defaultSection;
+		_sections = nullptr;
+		_defaultSection = nullptr;
+	}
+
+
+	void RawCfgParser::createSection( const std::string &secName )
+	{
 		if( secName == DEFAULT_SECTION )
-			return CFGPARSER_DUPLICATE_SECTION_ERROR("Default section can't be created by a user");
+			throw CfgParserException( "Duplicated section : Default section can't be created by a user");
 
-		if( !this->HasSection( secName ) ) {
+		if( !this->hasSection( secName ) ) {
+
 			Section *section = new Section( secName );
-			sections->push_back( section );
-			return CFGPARSER_SUCCESS();
+			_sections->push_back( section );
 		}
-		return CFGPARSER_DUPLICATE_SECTION_ERROR( "Section " + secName + " already exists!" );
 	}
 
 
-	StatusCode RawCfgParser::GetValue( const std::string& sectionName , const std::string &option, std::string *value ) const {
+	void RawCfgParser::addSection( Section *section ) {
 
+		if( section == nullptr )
+			return;
+
+		if( !this->hasSection( section ) )
+			_sections->push_back( section );
+	}
+
+
+	bool RawCfgParser::RawCfgParser::hasOption( const std::string &sectionName , const std::string &option ) const
+	{
 		Section *section = 0;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , section ) );
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , section->GetValue( option , value ) );
-		return CFGPARSER_SUCCESS();
+		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->getSection( sectionName , section ) );
+		return section->hasOption( option );
 	}
 
 
-	StatusCode RawCfgParser::GetValue( const std::string& sectionName , const std::string &option, int *value ) const {
-
-		Section *section = 0;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , section ) );
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , section->GetValue( option , value ) );
-		return CFGPARSER_SUCCESS();
+	bool RawCfgParser::hasSection( const std::string &secName ) const
+	{
+		return ( std::find_if( _sections->begin()
+							   ,_sections->begin()
+							   ,[&] ( Section *s ) -> bool { return ( s->getName() == secName); } )
+				!= _sections->end() );
 	}
 
 
-	StatusCode RawCfgParser::GetValue( const std::string& sectionName , const std::string &option, double *value ) const {
-
-		Section *section = 0;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , section ) );
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , section->GetValue( option , value ) );
-		return CFGPARSER_SUCCESS();
+	bool RawCfgParser::hasSection( const Section *section ) const
+	{
+		return ( std::find_if( _sections->begin()
+							   ,_sections->begin()
+							   ,[&] ( Section *s ) -> bool { return ( s->getName() == section->getName() ); } )
+				!= _sections->end() );
 	}
 
 
-	StatusCode RawCfgParser::GetValue( const std::string& sectionName , const std::string &option, bool *value ) const {
-
-		Section *section = 0;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , section ) );
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , section->GetValue( option , value ) );
-		return CFGPARSER_SUCCESS();
-	}
-
-
-	StatusCode RawCfgParser::GetValue( const std::string& sectionName , const std::string &option, std::vector< std::string > *value ) const {
-
-		Section *section = 0;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , section ) );
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , section->GetValue( option , value ) );
-		return CFGPARSER_SUCCESS();
-	}
-
-
-	StatusCode RawCfgParser::GetValue( const std::string& sectionName , const std::string &option, std::vector< int > *value ) const {
-
-		Section *section = 0;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , section ) );
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , section->GetValue( option , value ) );
-		return CFGPARSER_SUCCESS();
-	}
-
-
-	StatusCode RawCfgParser::GetValue( const std::string& sectionName , const std::string &option, std::vector< double > *value ) const {
-
-		Section *section = 0;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , section ) );
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , section->GetValue( option , value ) );
-		return CFGPARSER_SUCCESS();
-	}
-
-
-	StatusCode RawCfgParser::GetValue( const std::string& sectionName , const std::string &option, std::vector< bool > *value ) const {
-
-		Section *section = 0;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , section ) );
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , section->GetValue( option , value ) );
-		return CFGPARSER_SUCCESS();
-	}
-
-
-	bool RawCfgParser::RawCfgParser::HasOption( const std::string &sectionName , const std::string &option ) const {
-
-		Section *section = 0;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , section ) );
-		return section->HasOption( option );
-	}
-
-
-	bool RawCfgParser::HasSection( const std::string &secName ) const {
-
-		for( unsigned int i=0 ; i<sections->size() ; i++ ) {
-			if( sections->at(i)->GetName() == secName )
-				return true;
-		}
-		return false;
-	}
-
-
-	bool RawCfgParser::HasSection( const Section *section ) const {
-
-		for ( unsigned int i=0 ; i<sections->size() ; i++ ) {
-			if( sections->at(i)->GetName() == section->GetName() )
-				return true;
-		}
-		return false;
-	}
-
-
-	const Section *RawCfgParser::GetSection( const std::string &sectionName ) const {
-
+	const Section *RawCfgParser::getSection( const std::string &sectionName ) const
+	{
 		if( sectionName.empty() ) {
 			CFGPARSER_THROW_RESULT( CFGPARSER_MISSING_SECTION_NAME_ERROR("Assertion !sectionName.empty() failed") );
 		}
 
-		for( unsigned int i=0 ; i<sections->size() ; i++ ) {
-			if( sections->at(i)->GetName() == sectionName ) {
-				return sections->at(i);
-			}
-		}
+		auto it = std::find_if( _sections->begin()
+							  , _sections->end()
+							  , [&] ( Section *s ) { return ( s->getName() == sectionName ); } );
+		if( it != _sections->end() )
+			return *it;
+
 		CFGPARSER_THROW_RESULT( CFGPARSER_NO_SECTION_ERROR( "Section " + sectionName + " not found!" ) );
 	}
 
 
-	StatusCode RawCfgParser::Read( const std::string &fileName ) {
-
+	void RawCfgParser::read( const std::string &fileName )
+	{
 		if( fileName.empty() )
-			return CFGPARSER_ERROR("Assertion !fileName.empty() failed");
+			throw CfgParserException( "Error : fileName is an empty string");
 
 		ifstream *cfgFile = new ifstream();
 		cfgFile->open( fileName.c_str() );
 
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->_Read( cfgFile ) );
+		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->_read( cfgFile ) );
 
 		cfgFile->close();
 		delete cfgFile;
-
-		return CFGPARSER_SUCCESS();
 	}
 
 
-	StatusCode RawCfgParser::Read( const std::vector< std::string > &fileNames ) {
-
+	void RawCfgParser::read( const std::vector< std::string > &fileNames )
+	{
 		if( fileNames.empty() )
-			return CFGPARSER_ERROR("Assertion !fileNames.empty() failed");
+			throw CfgParserException( "Error : No file provided in vector");
 
 		for( unsigned int f=0 ; f<fileNames.size() ; f++ ) {
+
+			if( fileNames.at(f).empty() )
+				throw CfgParserException( "Error : fileName is an empty string");
 
 			ifstream *cfgFile = new ifstream();
 			cfgFile->open( fileNames.at(f).c_str() );
 
-			CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->_Read( cfgFile ) );
+			CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->_read( cfgFile ) );
 
 			cfgFile->close();
 			delete cfgFile;
 		}
-
-		return CFGPARSER_SUCCESS();
 	}
 
 
-	StatusCode RawCfgParser::Read( std::ifstream& stream ) {
-
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->_Read( &stream ) );
-		return CFGPARSER_SUCCESS();
+	void RawCfgParser::read( std::ifstream& stream )
+	{
+		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->_read( &stream ) );
 	}
 
 
-	StatusCode RawCfgParser::Read( std::ifstream* stream ) {
-
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->_Read( stream ) );
-		return CFGPARSER_SUCCESS();
+	void RawCfgParser::read( std::ifstream* stream )
+	{
+		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->_read( stream ) );
 	}
 
 
-	StatusCode RawCfgParser::RemoveOption( const std::string &sectionName , const std::string &opt ) {
-
-		Section *section = 0;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , section ) );
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , section->RemoveOption( opt ) );
-		return CFGPARSER_SUCCESS();
+	void RawCfgParser::removeOption( const std::string &sectionName , const std::string &opt )
+	{
+		Section *section = nullptr;
+		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->getSection( sectionName , section ) );
+		section->removeOption( opt );
 	}
 
-	StatusCode RawCfgParser::RemoveSection( const std::string &sectionName ) {
+	void RawCfgParser::removeSection( const std::string &sectionName ) {
 
-		Section *section = 0;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , section ) );
-		sections->erase( std::find( sections->begin() , sections->end() , section ) );
+		Section *section = nullptr;
+		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->getSection( sectionName , section ) );
+		_sections->erase( std::find( _sections->begin() , _sections->end() , section ) );
 		delete section;
-		return CFGPARSER_SUCCESS();
 	}
 
 
-	StatusCode RawCfgParser::SetValue( const std::string& sectionName , const std::string &option, const std::string &value ) {
-
-		Section *section = 0;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , section ) );
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , section->SetValue( option , value ) );
-		return CFGPARSER_SUCCESS();
-	}
-
-
-	StatusCode RawCfgParser::SetValue( const std::string& sectionName , const std::string &option, const int &value ) {
-
-		Section *section = 0;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , section ) );
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , section->SetValue( option , value ) );
-		return CFGPARSER_SUCCESS();
-	}
-
-
-	StatusCode RawCfgParser::SetValue( const std::string& sectionName , const std::string &option, const double &value ) {
-
-		Section *section = 0;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , section ) );
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , section->SetValue( option , value ) );
-		return CFGPARSER_SUCCESS();
-	}
-
-
-	StatusCode RawCfgParser::SetValue( const std::string& sectionName , const std::string &option, const bool &value ) {
-
-		Section *section = 0;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , section ) );
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , section->SetValue( option , value ) );
-		return CFGPARSER_SUCCESS();
-	}
-
-
-	StatusCode RawCfgParser::SetValue( const std::string& sectionName , const std::string &option, const std::vector< std::string > &value ) {
-
-		Section *section = 0;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , section ) );
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , section->SetValue( option , value ) );
-		return CFGPARSER_SUCCESS();
-	}
-
-
-	StatusCode RawCfgParser::SetValue( const std::string& sectionName , const std::string &option, const std::vector< int > &value ) {
-
-		Section *section = 0;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , section ) );
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , section->SetValue( option , value ) );
-		return CFGPARSER_SUCCESS();
-	}
-
-
-	StatusCode RawCfgParser::SetValue( const std::string& sectionName , const std::string &option, const std::vector< double > &value ) {
-
-		Section *section = 0;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , section ) );
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , section->SetValue( option , value ) );
-		return CFGPARSER_SUCCESS();
-	}
-
-
-	StatusCode RawCfgParser::SetValue( const std::string& sectionName , const std::string &option, const std::vector< bool > &value ) {
-
-		Section *section = 0;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , section ) );
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , section->SetValue( option , value ) );
-		return CFGPARSER_SUCCESS();
-	}
-
-
-	StatusCode RawCfgParser::Write( const std::string &fileName ) const {
-
+	void RawCfgParser::write( const std::string &fileName ) const
+	{
 		ofstream *cfgFile = new ofstream();
 		cfgFile->open( fileName.c_str() );
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->Write( cfgFile ) );
+		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->_write( cfgFile ) );
 		cfgFile->close();
 		delete cfgFile;
-		return CFGPARSER_SUCCESS();
 	}
 
 
-	StatusCode RawCfgParser::Write( std::ofstream& stream ) const {
-
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->Write( &stream ) );
-		return CFGPARSER_SUCCESS();
+	void RawCfgParser::write( std::ofstream& stream ) const
+	{
+		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->_write( &stream ) );
 	}
 
 
-	StatusCode RawCfgParser::Write( std::ofstream* stream ) const {
+	void RawCfgParser::write( std::ofstream* stream ) const
+	{
+		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->_write( stream ) );
+	}
 
-		if( stream == 0 )
+
+	StatusCode RawCfgParser::_write( std::ofstream* stream ) const
+	{
+		if( stream == nullptr )
 			return CFGPARSER_ERROR("Assertion stream != 0 failed");
 
 		if( !stream->is_open() )
 			return CFGPARSER_ERROR("Cfg file stream is not opened or doesn't exists!");
 
-		if( sections->empty() )
+		if( _sections->empty() )
 			return CFGPARSER_ERROR("No section to write out!");
 
 		time_t now = time( 0 );
@@ -378,23 +265,22 @@ namespace cfgparser {
 		*stream << endl;
 		*stream << endl;
 
-		if( !defaultSection->IsEmpty() ) {
+		if( !_defaultSection->isEmpty() ) {
 
 			*stream << "[DEFAULT]" << endl;
 			*stream << endl;
-			OptionValueMap optionValueMap = defaultSection->GetOptionValueMap();
-			OptionValueMap::iterator it;
-			for( it=optionValueMap.begin() ; it!=optionValueMap.end() ; it++ )
+			auto optionValueMap = _defaultSection->getOptionValueMap();
+			for( auto it=optionValueMap.begin() ; it!=optionValueMap.end() ; it++ )
 				*stream << it->first << " = " << it->second << endl;
 		}
 
-		for( unsigned int i=0 ; i<sections->size() ; i++ ) {
+		for( unsigned int i=0 ; i<_sections->size() ; i++ ) {
 
-			*stream << "[" << sections->at(i)->GetName() << "]" << endl;
+			*stream << "[" << _sections->at(i)->getName() << "]" << endl;
 			*stream << endl;
-			OptionValueMap optionValueMap = sections->at(i)->GetOptionValueMap();
-			OptionValueMap::iterator it;
-			for( it=optionValueMap.begin() ; it!=optionValueMap.end() ; it++ )
+			auto optionValueMap = _sections->at(i)->getOptionValueMap();
+
+			for( auto it=optionValueMap.begin() ; it!=optionValueMap.end() ; it++ )
 				*stream << it->first << " = " << it->second << endl;
 			*stream << endl;
 			*stream << endl;
@@ -405,85 +291,84 @@ namespace cfgparser {
 	}
 
 
-	StatusCode RawCfgParser::Print() const {
+	void RawCfgParser::print() const
+	{
 
-		if( sections->empty() )
-			return CFGPARSER_SUCCESS();
+		if( _sections->empty() )
+			return;
 
-		if( !defaultSection->IsEmpty() ) {
+		if( !_defaultSection->isEmpty() ) {
 
 			cout << "[DEFAULT]" << endl;
 			cout << endl;
-			OptionValueMap optionValueMap = defaultSection->GetOptionValueMap();
-			OptionValueMap::iterator it;
-			for( it=optionValueMap.begin() ; it!=optionValueMap.end() ; it++ )
+			auto optionValueMap = _defaultSection->getOptionValueMap();
+
+			for( auto it=optionValueMap.begin() ; it!=optionValueMap.end() ; it++ )
 				cout << it->first << " = " << it->second << endl;
 			cout << endl;
 		}
 
-		for( unsigned int i=0 ; i<sections->size() ; i++ ) {
+		for( unsigned int i=0 ; i<_sections->size() ; i++ ) {
 
-			cout << "[" << sections->at(i)->GetName() << "]" << endl;
+			cout << "[" << _sections->at(i)->getName() << "]" << endl;
 			cout << endl;
-			OptionValueMap optionValueMap = sections->at(i)->GetOptionValueMap();
-			OptionValueMap::iterator it;
-			for( it=optionValueMap.begin() ; it!=optionValueMap.end() ; it++ )
+			auto optionValueMap = _sections->at(i)->getOptionValueMap();
+
+			for( auto it=optionValueMap.begin() ; it!=optionValueMap.end() ; it++ )
 				cout << it->first << " = " << it->second << endl;
 			cout << endl;
 		}
-		return CFGPARSER_SUCCESS();
+
 	}
 
 
-	std::string RawCfgParser::OptionXForm( const std::string &optionStr ) const {
-
-		return ToLower( optionStr );
+	std::string RawCfgParser::optionXForm( const std::string &optionStr ) const
+	{
+		return std::move( cfgparser::toLower( optionStr ) );
 	}
 
 
-	const StringCollection RawCfgParser::GetOptions( const std::string &sectionName ) const {
-
+	const StringCollection RawCfgParser::getOptions( const std::string &sectionName ) const
+	{
 		if( sectionName.empty() ) {
 			CFGPARSER_THROW_RESULT( CFGPARSER_MISSING_SECTION_NAME_ERROR("Assertion !section.empty() failed") );
 		}
 
-		Section *section = 0;
+		Section *section = nullptr;
 		StringCollection options;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , section ) );
-		OptionValueMap optionValueMap = section->GetOptionValueMap();
-		OptionValueMap::iterator it = optionValueMap.begin();
-		for( ; it!=optionValueMap.end() ; it++ )
+		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->getSection( sectionName , section ) );
+		auto optionValueMap = section->getOptionValueMap();
+
+		for( auto it = optionValueMap.begin() ; it!=optionValueMap.end() ; it++ )
 			options.push_back( it->first );
 
-		return options;
+		return std::move( options );
 	}
 
 
-	const StringCollection RawCfgParser::GetValues( const std::string &sectionName ) const {
-
+	const StringCollection RawCfgParser::getValues( const std::string &sectionName ) const
+	{
 		if( sectionName.empty() ) {
 			CFGPARSER_THROW_RESULT( CFGPARSER_MISSING_SECTION_NAME_ERROR("Assertion !section.empty() failed") );
 		}
 
-		Section *section = 0;
+		Section *section = nullptr;
 		StringCollection values;
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , section ) );
-		OptionValueMap optionValueMap = section->GetOptionValueMap();
-		OptionValueMap::iterator it = optionValueMap.begin();
-		for( ; it!=optionValueMap.end() ; it++ )
+		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->getSection( sectionName , section ) );
+		auto optionValueMap = section->getOptionValueMap();
+
+		for( auto it = optionValueMap.begin() ; it!=optionValueMap.end() ; it++ )
 			values.push_back( it->second );
 
-		return values;
+		return std::move( values );
 	}
 
 
-	StatusCode RawCfgParser::Clear() {
-
-		for( unsigned int i=0 ; i<sections->size() ; i++ ) {
-			CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , sections->at(i)->Clear() );
-		}
-		CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , defaultSection->Clear() );
-		return CFGPARSER_SUCCESS();
+	void RawCfgParser::clear()
+	{
+		for( unsigned int i=0 ; i<_sections->size() ; i++ )
+			_sections->at(i)->clear();
+		_defaultSection->clear();
 	}
 
 
@@ -493,28 +378,15 @@ namespace cfgparser {
 	 * Private member functions
 	 ****************************/
 
-	StatusCode RawCfgParser::AddSection( Section *section ) {
-
-		if( section == 0 )
-			return CFGPARSER_MISSING_SECTION_NAME_ERROR("Assertion section != 0 failed");
-
-		if( !this->HasSection( section ) ) {
-			sections->push_back( section );
-			return CFGPARSER_SUCCESS();
-		}
-		else return CFGPARSER_DUPLICATE_SECTION_ERROR( "Section " + section->GetName() + " already exists!" );
-	}
-
-
-	StatusCode RawCfgParser::_Read( std::ifstream* stream ) {
-
-		if( stream == 0 )
+	StatusCode RawCfgParser::_read( std::ifstream* stream )
+	{
+		if( stream == nullptr )
 			return CFGPARSER_ERROR("Assertion stream != 0 failed");
 
 		if( !stream->is_open() )
 			return CFGPARSER_ERROR("Cfg file stream is not opened or doesn't exists!");
 
-		Section *currentSection = 0;
+		Section *currentSection = nullptr;
 		string optionName = "";
 		int lineNb = 0;
 
@@ -533,7 +405,7 @@ namespace cfgparser {
 
 			// check for comment line
 			string tempLine = line;
-			StrTrim( &tempLine );
+			strTrim( &tempLine );
 			if( tempLine.empty() || tempLine.at(0) == ';' || tempLine.at(0) == '#' )
 				continue;
 
@@ -541,11 +413,11 @@ namespace cfgparser {
 			if( std::isspace( line.at(0)) ) {
 
 				string value = line;
-				StrTrim( &value );
-				if( !value.empty() && currentSection != 0 ) {
+				strTrim( &value );
+				if( !value.empty() && currentSection != nullptr ) {
 					string val;
-					CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , currentSection->GetValue( optionName , &val ) );
-					CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , currentSection->SetValue( optionName , val + value ) );
+					val = currentSection->getValue<string>( optionName );
+					currentSection->setValue<string>( optionName , val + value );
 				}
 			}
 			// Check for section header or option header in file
@@ -553,26 +425,26 @@ namespace cfgparser {
 
 				string sectionName;
 				// Is it a section header ?
-				if( fParserSuccess == GroupSectionName( line , sectionName ).fParserStatus ) {
+				if( fParserSuccess == groupSectionName( line , sectionName )._parserStatus ) {
 
-					if( this->HasSection( sectionName ) ) {
+					if( this->hasSection( sectionName ) ) {
 
-						CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->GetSection( sectionName , currentSection) );
+						CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->getSection( sectionName , currentSection) );
 					}
 					else if( sectionName == DEFAULT_SECTION ) {
 
-						currentSection = defaultSection;
+						currentSection = _defaultSection;
 					}
 					else {
 
 						currentSection = new Section( sectionName );
-						CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->AddSection( currentSection ) );
+						this->addSection( currentSection );
 
 					}
 					// A section can't start with continuation line
 					optionName = "";
 				}
-				else if( currentSection == 0 ) {
+				else if( currentSection == nullptr ) {
 					return CFGPARSER_MISSING_SECTION_NAME_ERROR("No section in cfg file!");
 				}
 				// Check for option line
@@ -580,11 +452,11 @@ namespace cfgparser {
 
 					string separator;
 					string value;
-					StatusCode stat = GroupOptionSeparatorAndValue( line , optionName , separator , value );
+					StatusCode stat = cfgparser::groupOptionSeparatorAndValue( line , optionName , separator , value );
 
-					if( fParserSuccess == stat.fParserStatus ) {
+					if( fParserSuccess == stat._parserStatus ) {
 
-						optionName = ToLower( optionName );
+						optionName = toLower( optionName );
 
 						if( !value.empty() ) {
 
@@ -596,18 +468,18 @@ namespace cfgparser {
 								value = value.substr(0,pos);
 							}
 
-							StrTrim( &value );
+							strTrim( &value );
 							// Allows empty value
 							if( value == "\"\"" )
 								value = "";
-							CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , currentSection->SetValue( optionName , value ) );
+							currentSection->setValue<string>( optionName , value );
 
 						}
 						// Value-less option handling
-						if( !allowNoValue && (value == "\"\"" || value.empty()) )
+						if( !_allowNoValue && (value == "\"\"" || value.empty()) )
 								return CFGPARSER_PARSING_ERROR("Missing value for option '"+ optionName +"' (allow no value set to true).\nTo allow empty value, switch on the 'allowNoValue' in constructor");
 
-						CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , currentSection->SetValue( optionName , value ) );
+						currentSection->setValue<string>( optionName , value );
 
 					}
 					else return stat;
@@ -620,20 +492,19 @@ namespace cfgparser {
 	}
 
 
-	StatusCode RawCfgParser::GetSection( const std::string &sectionName , Section *&sec ) const {
-
+	StatusCode RawCfgParser::getSection( const std::string &sectionName , Section *sec ) const
+	{
 		if( sectionName.empty() )
 			return CFGPARSER_MISSING_SECTION_NAME_ERROR("Assertion !section.empty() failed");
 
-		for( unsigned int i=0 ; i<sections->size() ; i++ ) {
-			if( sections->at(i)->GetName() == sectionName ) {
-				sec = sections->at(i);
+		for( unsigned int i=0 ; i<_sections->size() ; i++ ) {
+			if( _sections->at(i)->getName() == sectionName ) {
+				sec = _sections->at(i);
 				return CFGPARSER_SUCCESS();
 			}
 		}
 		return CFGPARSER_NO_SECTION_ERROR( "Section " + sectionName + " not found!" );
 	}
-
 
 }  // namespace 
 
