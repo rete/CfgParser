@@ -48,8 +48,7 @@
 namespace cfgparser {
 
 
-	/*!
-	 *
+	/**
 	 * @brief  ChainSection class,
 	 * this class is a helper class for CfgParser
 	 * class while using interpolations.
@@ -59,74 +58,57 @@ namespace cfgparser {
 	 * order. First section appended, first section
 	 * checked. This class is not really useful if
 	 * used in an other context of CfgParser library.
-	 *
 	 */
 
 	class ChainSection {
 
-		public:
+	public:
 
-			/*!
-			 *
-			 * @brief  Constructor
-			 *
-			 */
-			ChainSection()
-				: sectionCollection( new SectionCollection() ) {}
+		/**
+		 * @brief Constructor
+		 */
+		ChainSection();
 
-			/*!
-			 *
-			 * @brief  Destructor
-			 *
-			 */
-			~ChainSection() {
+		/**
+		 * @brief Destructor
+		 */
+		~ChainSection();
 
-				sectionCollection->clear();
-				delete sectionCollection;
-			}
+		/**
+		 * @brief Add a section to the section list
+		 */
+		void addSection( Section *sec )
+		{
+			_sectionCollection->push_back( sec );
+		}
 
-			/*!
-			 *
-			 * @brief Add a section to the section list
-			 *
-			 */
-			void AddSection( Section *sec )
-				{ sectionCollection->push_back( sec ); }
+		/**
+		 * @brief Returns a value by looking in the order where
+		 * the sections have been added.
+		 */
+		std::string getValue( const std::string &option ) const;
 
-			/*!
-			 *
-			 * @brief  Return a value by looking in the order where
-			 * the sections have been added.
-			 *
-			 */
-			StatusCode GetValue( const std::string &option , std::string *value ) const;
+		/**
+		 * @brief Returns all the options of all sections
+		 */
+		StringCollection getOptions() const;
 
-			/*!
-			 *
-			 * @brief  Return all the options of all sections
-			 *
-			 */
-			StringCollection GetOptions() const;
-
-			/*!
-			 *
-			 * @brief  Return true if one of the sections has the given option
-			 *
-			 */
-			bool HasOption( const std::string &opt ) const;
+		/**
+		 * @brief Returns true if one of the sections has the given option
+		 */
+		bool hasOption( const std::string &opt ) const;
 
 
-		// private members
-		private:
-			SectionCollection *sectionCollection;    ///< The sections in a specific order
+	// private members
+	private:
+		SectionCollection *_sectionCollection;    ///< The sections in a specific order
 
 
 	};
 
-	/*!
-	 *
+	/**
 	 * @brief  CfgParser class,
-	 * implements a new GetValue() virtual method for strings
+	 * implements a new getValue() virtual method for strings
 	 * that interpolate a specific string portion like %()s
 	 * with a given set of options.
 	 *
@@ -143,40 +125,68 @@ namespace cfgparser {
 	 * Here, option2 will resolve in "42 is the answer of everything"
 	 * To disable this feature and retrieve the raw value, use the
 	 * boolean value raw = true.
-	 *
 	 */
 
 	class CfgParser : public RawCfgParser {
 
 
-		// public member functions
-		public :
+	// public member functions
+	public :
 
-			/*!
-			 *
-			 * @brief Default constructor
-			 *
-			 */
-			CfgParser();
+		/**
+		 * @brief Default constructor
+		 */
+		CfgParser();
 
-			/*!
-			 *
-			 * @brief  Get a string value with a given section name and option name
-			 *
-			 */
-			virtual StatusCode GetValue( const std::string& section , const std::string &key, std::string *value , bool raw = false , Section *vars = 0 ) const;
+		/**
+		 * @brief Get a value with a type T
+		 */
+		template<typename T>
+		T getValue( const std::string& sectionName , const std::string &key , bool raw = false , Section *vars = nullptr ) const
+		{
+			std::string option = key;
+			std::string value;
+			Section *section = nullptr;
 
+			if( this->hasSection( sectionName ) ) {
+				CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , RawCfgParser::getSection( sectionName , section ) );
+			}
+			else {
+				if( sectionName != DEFAULT_SECTION )
+					throw CfgParserException( "No section error : Section '"+sectionName+"' not found" );
+			}
 
-		// protected member functions
-		protected:
+			// look up in successive sections in that order : vars -> section -> default
+			ChainSection *chainSection = new ChainSection();
 
-			/*!
-			 *
-			 * @brief  Interpolate a given string with a given set of sections (ChainSection).
-			 * The final value is retrieved in the 'value' argument
-			 *
-			 */
-			StatusCode Interpolate( const std::string &str , const ChainSection *chainSection , std::string *value ) const;
+			if( vars != nullptr )
+				chainSection->addSection( vars );
+			if( section != nullptr ) {
+				chainSection->addSection( section );
+			}
+			if( !_defaultSection->isEmpty() )
+				chainSection->addSection( _defaultSection );
+
+			value = chainSection->getValue( option );
+
+			if( !raw ) {
+				CFGPARSER_THROW_RESULT_IF( CFGPARSER_SUCCESS() , != , this->interpolate( value , chainSection , &value ) );
+			}
+
+			delete chainSection;
+			T finalVal;
+			cfgparser::convert<T>( value , finalVal );
+			return std::move( finalVal );
+		}
+
+	// protected member functions
+	protected:
+
+		/**
+		 * @brief  Interpolate a given string with a given set of sections (ChainSection).
+		 * The final value is retrieved in the 'value' argument
+		 */
+		StatusCode interpolate( const std::string &str , const ChainSection *chainSection , std::string *value ) const;
 
 	};
 
